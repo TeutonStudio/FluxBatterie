@@ -7,3 +7,5 @@ run-*/
 libs/
 vendor/
 *.log
+
+.kotlin/
