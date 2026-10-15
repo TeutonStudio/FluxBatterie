@@ -10,9 +10,11 @@ Auf Client und Server installieren:
 - Mekanism **1.21.1-10.7.19.85** (interne Mod-Version `10.7.19`)
 - Kotlin for Forge **5.9.0** (NeoForge-Version)
 - `fluxbattery-0.1.0-dev.jar` aus `build/libs/`
-- `FluxNetworks-1.21.1-8.0.0-fluxbattery.1.jar` aus `build/bridge/`
+- originales `FluxNetworks-1.21.1-8.0.0.jar` (CurseForge-Datei **6089446**)
 
-**Das Bridge-JAR ersetzt Flux Networks 8.0.0. Original und Bridge niemals gleichzeitig installieren. Das unveränderte Flux-JAR genügt nicht.** Bestehende Mod-ID und Speicherformate bleiben erhalten. Weitere optionale Flux-Integrationsmods sind für die hier getestete Kombination nicht erforderlich.
+**Ausgeliefert wird nur das Flux-Battery-JAR.** Ein Ladezeit-Patch erweitert die originalen Flux-Klassen im Speicher. Ein altes Ersatz-/Bridge-JAR muss aus dem Mods-Ordner entfernt werden. Mod-ID und Flux-Speicherformate bleiben erhalten.
+
+Freigegeben ist ausschließlich das unveränderte Flux Networks **8.0.0**, SHA-256 `29e511b2d76f85bd247aa213a92bb059ecc037fcc3fed82baffcff97b638d3a6`. Version, JAR und Pflichtstrukturen werden geprüft; ein unpassender Stand bricht den Start mit einer konkreten Meldung ab.
 
 ## Bedienung
 
@@ -25,7 +27,7 @@ Auf Client und Server installieren:
 
 Privat-/verschlüsselte Netzwerke erfordern dauerhafte Besitzer- oder Mitgliedsrechte. Passwörter werden nicht gespeichert. Nur der Batterie-Besitzer kann ihre Konfiguration bearbeiten. Netzwerkrechte werden während des Betriebs erneut geprüft.
 
-Getestet: Digital Miner (tatsächlicher Erzabbau), Enrichment Chamber, Energized Smelter. Der gemeinsame Adapter unterstützt weitere Mekanism-Maschinen mit `fill`-/`fillOrConvert`-Energieslots. Komplexe `IMultiblock`-Maschinen sind ausgeschlossen. Bei mehreren Batterieslots arbeitet nur die Batterie im ersten passenden Slot als Point; weitere bleiben normale Energieitems.
+Getestet: Digital Miner (tatsächlicher Erzabbau), Enrichment Chamber, Energized Smelter. Der Mekanism-Adapter unterstützt weitere Mekanism-Maschinen mit `fill`-/`fillOrConvert`-Energieslots. Komplexe `IMultiblock`-Maschinen sind ausgeschlossen. Fremde FE-Maschinen werden nicht automatisch unterstützt; zusätzliche Mod-Adapter sind ein separates Erweiterungsziel. Bei mehreren Batterieslots arbeitet nur die Batterie im ersten passenden Slot als Point; weitere bleiben normale Energieitems.
 
 ## Serverkonfiguration
 
@@ -46,10 +48,15 @@ python3 scripts/bootstrap-dependencies.py
 ./gradlew build
 ./gradlew runGameTestServer
 python3 scripts/test-restart.py
-./gradlew runClient -PclientSmoke
+python3 scripts/test-loader.py
+python3 scripts/test-server.py
+./gradlew runClient -PpackagedAddon -PclientSmoke
+python3 scripts/verify-distribution.py
 ```
 
-Java 21 über `JAVA_HOME` auswählen; Gradle kann die Toolchain alternativ herunterladen. Der unveränderte MDK-Wrapper ist Gradle **9.2.1**, ModDevGradle **2.0.141**, Kotlin **2.1.21**. Die Bootstrap-Datei lädt nur das festgelegte Original-Flux-JAR und prüft SHA-256; Gradle lädt Mekanism/KFF aus den festgelegten Maven-Repositories. `build` erzeugt beide benötigten Mod-JARs. Der Client-Smoke-Test zeigt eine synthetische Konfigurationsvorschau, speichert `docs/evidence/battery-screen.png` und beendet den Client.
+Java 21 über `JAVA_HOME` auswählen; Gradle kann die Toolchain alternativ herunterladen. Der unveränderte MDK-Wrapper ist Gradle **9.2.1**, ModDevGradle **2.0.141**, Kotlin **2.1.21**. Die Bootstrap-Datei lädt nur das festgelegte Original-Flux-JAR und prüft SHA-256; Gradle lädt Mekanism/KFF aus den festgelegten Maven-Repositories. `build` erzeugt ausschließlich das Addon in `build/libs/`; `patchedFlux` und der Bridge-SourceSet entfallen. Für einen Lauf mit dem gebauten Addon-JAR statt losen Entwicklungsklassen: `./gradlew runGameTestServer -PpackagedAddon`. Die Bytecode-Prüfstrukturen sind eingecheckt; `verifyLoader` prüft Originalklassen sowie absichtlich veränderte und fehlende Methoden und gehört zu `check`. `generateFluxShapes` ist ausschließlich ein Wartungswerkzeug nach bewusst geprüfter Änderung der Zielversion.
+
+Der Client-Smoke-Test zeigt eine synthetische Konfigurationsvorschau, speichert `docs/evidence/battery-screen.png` und beendet den Client.
 
 ## Entwicklungsstand
 

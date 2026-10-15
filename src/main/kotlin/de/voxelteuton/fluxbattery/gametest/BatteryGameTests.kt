@@ -230,7 +230,13 @@ class BatteryGameTests {
         val network = network(helper)
         val tile = machine(helper, "enrichment_chamber")
         insert(tile, config(helper, network))
+        val pendingPoint = checkNotNull(tile.getData(FluxBatteryMod.HOST_ATTACHMENT.get()).point)
         FluxNetworkData.getInstance().deleteNetwork(network)
+        check(!network.isValid && !pendingPoint.active)
+        check(!network.registerRuntime(pendingPoint)) { "Deleted network accepted a new participant" }
+        check((network as ServerRuntimeAccess).fluxBatteryPending().isEmpty())
+        check(network.runtimeDevices(FluxNetwork.ANY).isEmpty())
+        network.onEndServerTick() // Deletion leaves usable empty lists, never null arrays.
         FluxBatteryHostManager.tick(tile)
         check(tile.getData(FluxBatteryMod.HOST_ATTACHMENT.get()).point == null)
         helper.succeed()
@@ -265,6 +271,9 @@ class BatteryGameTests {
     fun normalFluxDevices(helper: GameTestHelper) {
         val network = network(helper)
         val plug = supply(helper, network, 1000)
+        if (System.getProperty("fluxbattery.compatFixture") == "true") {
+            check(network.javaClass.getMethod("fluxBatteryMixinProbe").invoke(network) == 42) { "External Mixin fixture did not apply" }
+        }
         fun device(name: String, x: Int): sonar.fluxnetworks.common.device.TileFluxDevice {
             val pos = BlockPos(x, 1, 5)
             helper.setBlock(pos, BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("fluxnetworks", name)))
@@ -346,6 +355,149 @@ class BatteryGameTests {
         } finally {
             cleanup(network, first, second)
             BatteryServerConfig.capacity.set(capacity)
+        }
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 40)
+    fun hostedDisplayColorAndSaturatedStatistics(helper: GameTestHelper) {
+        val capacity = BatteryServerConfig.capacity.get()
+        val network = network(helper)
+        val first = machine(helper, "enrichment_chamber", 2)
+        val second = machine(helper, "energized_smelter", 6)
+        val player = FakePlayerFactory.getMinecraft(helper.level)
+        val previousMenu = player.containerMenu
+        try {
+            BatteryServerConfig.capacity.set(Long.MAX_VALUE)
+            val a = insert(first, config(helper, network, Long.MAX_VALUE).copy(disableTransferLimit = true))
+            val b = insert(second, config(helper, network, Long.MAX_VALUE).copy(disableTransferLimit = true))
+            val plug = supply(helper, network, 0)
+            val otherPlugPos = BlockPos(13, 1, 2)
+            helper.setBlock(otherPlugPos, BuiltInRegistries.BLOCK.get(ResourceLocation.parse("fluxnetworks:flux_plug")))
+            val otherPlug: TileFluxPlug = helper.getBlockEntity(otherPlugPos)
+            otherPlug.transferHandler.applyConfiguration(FluxDeviceConfigComponent.EMPTY, 0)
+            otherPlug.transferHandler.setDisableLimit(true)
+            check(otherPlug.connect(network))
+            repeat(20) { network.onEndServerTick() }
+            check(plug.transferHandler.receive(Long.MAX_VALUE, net.minecraft.core.Direction.NORTH, false, network.bufferLimiter) == Long.MAX_VALUE)
+            check(otherPlug.transferHandler.receive(Long.MAX_VALUE, net.minecraft.core.Direction.NORTH, false, network.bufferLimiter) == Long.MAX_VALUE)
+            network.onEndServerTick()
+            check(BatteryStateService.energy(a.stack).storedEnergy == Long.MAX_VALUE)
+            check(BatteryStateService.energy(b.stack).storedEnergy == Long.MAX_VALUE)
+            check(network.statistics.energyInput == Long.MAX_VALUE / 4)
+            check(network.statistics.energyOutput == Long.MAX_VALUE / 4)
+            check(network.statistics.fluxPointCount == 2 && network.statistics.fluxPlugCount == 2)
+            check(plug.transferHandler.buffer == 0L && otherPlug.transferHandler.buffer == 0L)
+            val tag = net.minecraft.nbt.CompoundTag()
+            network.writeCustomTag(tag, sonar.fluxnetworks.api.FluxConstants.NBT_NET_ALL_CONNECTIONS)
+            val entries = tag.getList("connections", net.minecraft.nbt.Tag.TAG_COMPOUND.toInt())
+            // Use Flux's existing deserializer, including its display-item field and machine GlobalPos.
+            val hosted = (0 until entries.size).map { entries.getCompound(it).let { c -> sonar.fluxnetworks.common.connection.PhantomFluxDevice.makeUpdated(sonar.fluxnetworks.common.util.FluxUtils.readGlobalPos(c), c) } }
+                .filter { it.deviceType.isPoint }
+            check(hosted.size == 2)
+            check(hosted.all { it.displayStack.item is FluxBatteryItem && it.customName == "test" && it.transferChange == -Long.MAX_VALUE })
+            check(hosted.map { it.globalPos.pos() }.toSet() == setOf(first.blockPos, second.blockPos))
+            val point = checkNotNull(first.getData(FluxBatteryMod.HOST_ATTACHMENT.get()).point)
+            player.containerMenu = sonar.fluxnetworks.common.connection.FluxMenu(17, player.inventory, point)
+            val handler = sonar.fluxnetworks.register.Messages::class.java.declaredMethods.single { it.name.startsWith("lambda\$onEditNetwork\$") }
+            handler.isAccessible = true
+            handler.invoke(null, java.util.function.Supplier { player }, network.networkID, 17, network.networkName, 0x123456, SecurityLevel.PUBLIC, "")
+            check(network.networkColor == 0x123456) { "Flux color-update callback failed" }
+            check(point.active && helper.level.getBlockEntity(first.blockPos) === first)
+            otherPlug.disconnect()
+            helper.succeed()
+        } catch (error: Throwable) {
+            error.printStackTrace()
+            throw error
+        } finally {
+            player.containerMenu = previousMenu
+            cleanup(network, first, second)
+            BatteryServerConfig.capacity.set(capacity)
+        }
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 80)
+    fun breakPickupAndReplaceMachine(helper: GameTestHelper) {
+        val enabled = BatteryServerConfig.chunkLoading.get()
+        val fluxEnabled = sonar.fluxnetworks.FluxConfig.enableChunkLoading
+        val player = FakePlayerFactory.getMinecraft(helper.level)
+        val hand = net.minecraft.world.InteractionHand.MAIN_HAND
+        val previous = player.getItemInHand(hand)
+        val network = network(helper)
+        val tile = machine(helper, "enrichment_chamber")
+        val oldPos = tile.blockPos.immutable()
+        val newPos = BlockPos(8192, 64, 8192)
+        // GameTestServer has no GameProfileCache. Real servers populate UsernameCache on login.
+        net.neoforged.neoforge.common.UsernameCache::class.java.getDeclaredMethod("setUsername", UUID::class.java, String::class.java).apply {
+            isAccessible = true
+        }.invoke(null, player.uuid, player.gameProfile.name)
+        try {
+            BatteryServerConfig.chunkLoading.set(true)
+            sonar.fluxnetworks.FluxConfig.enableChunkLoading = true
+            val machineEnergy = tile.getEnergyContainers(null).first()
+            machineEnergy.energy = machineEnergy.maxEnergy
+            val machineStored = machineEnergy.energy
+            val configuration = config(helper, network).copy(customName = "machine item roundtrip", priority = 73, surgeMode = true, chunkLoadingEnabled = true)
+            val slot = insert(tile, configuration)
+            BatteryStateService.receive(slot.stack, 765432, false)
+            val identity = BatteryStateService.identity(slot.stack)
+            network.onEndServerTick()
+            val originalPoint = checkNotNull(tile.getData(FluxBatteryMod.HOST_ATTACHMENT.get()).point)
+            check(originalPoint.ticket)
+            player.setItemInHand(hand, ItemStack(net.minecraft.world.item.Items.DIAMOND_PICKAXE))
+            player.gameMode.changeGameModeForPlayer(net.minecraft.world.level.GameType.SURVIVAL)
+            check(player.gameMode.destroyBlock(oldPos)) { "Survival machine break failed" }
+            network.onEndServerTick()
+            check(!originalPoint.active && !originalPoint.ticket)
+            check(network.getConnectionByPos(GlobalPos.of(helper.level.dimension(), oldPos)) == null)
+            check(network.runtimeDevices(FluxNetwork.POINT).isEmpty())
+            val tickets = helper.level.dataStorage.computeIfAbsent(net.minecraft.world.level.ForcedChunksSavedData.factory(), "chunks").blockForcedChunks.tickingChunks
+            check(tickets.values.none { it.contains(net.minecraft.world.level.ChunkPos(oldPos).toLong()) }) { "Ticket remained after machine break" }
+            val drops = helper.level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity::class.java, net.minecraft.world.phys.AABB(oldPos).inflate(2.0))
+            val dropped = drops.single { it.item.`is`(tile.blockState.block.asItem()) }
+            dropped.setNoPickUpDelay()
+            dropped.playerTouch(player)
+            check(dropped.isRemoved) { "Machine item was not picked up" }
+            val inventoryIndex = (0 until player.inventory.containerSize).first { player.inventory.getItem(it).`is`(tile.blockState.block.asItem()) }
+            val machineItem = player.inventory.removeItemNoUpdate(inventoryIndex)
+            val saved = machineItem.save(helper.level.registryAccess())
+            val restored = ItemStack.parse(helper.level.registryAccess(), saved).orElseThrow()
+            val storedBattery = restored.get(mekanism.common.registries.MekanismDataComponents.ATTACHED_ITEMS.get())!!.containers().single { it.item is FluxBatteryItem }
+            check(BatteryStateService.identity(storedBattery) == identity)
+            check(BatteryStateService.config(storedBattery) == configuration)
+            check(BatteryStateService.energy(storedBattery).storedEnergy == 765432L)
+            // DedicatedServer terrain can occupy the target; GameTestServer's flat world is empty here.
+            helper.level.removeBlock(newPos, false)
+            helper.level.setBlockAndUpdate(newPos.below(), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState())
+            player.setItemInHand(hand, restored)
+            val hit = net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(newPos.below()), net.minecraft.core.Direction.UP, newPos.below(), false)
+            val context = net.minecraft.world.item.context.BlockPlaceContext(player, hand, restored, hit)
+            check((restored.item as net.minecraft.world.item.BlockItem).place(context).consumesAction()) { "Machine item placement failed" }
+            val replacement = helper.level.getBlockEntity(newPos) as TileEntityMekanism
+            val restoredSlot = MekanismHostAdapter.dischargeSlots(replacement).first().second
+            check(BatteryStateService.energy(restoredSlot.stack).storedEnergy == 765432L)
+            check(BatteryStateService.config(restoredSlot.stack) == configuration)
+            check(BatteryStateService.identity(restoredSlot.stack) == identity)
+            check(replacement.getEnergyContainers(null).first().energy == machineStored)
+            FluxBatteryHostManager.tick(replacement)
+            network.onEndServerTick()
+            check(network.runtimeDevices(FluxNetwork.POINT).single().globalPos.pos() == newPos)
+            check(network.getConnectionByPos(GlobalPos.of(helper.level.dimension(), oldPos)) == null)
+            check(replacement.getData(FluxBatteryMod.HOST_ATTACHMENT.get()).point?.ticket == true)
+            helper.level.removeBlock(newPos, false)
+            network.onEndServerTick()
+            check(network.runtimeDevices(FluxNetwork.POINT).isEmpty())
+            check(tickets.values.none { it.contains(net.minecraft.world.level.ChunkPos(newPos).toLong()) })
+            helper.succeed()
+        } catch (error: Throwable) {
+            error.printStackTrace()
+            throw error
+        } finally {
+            player.setItemInHand(hand, previous)
+            helper.level.removeBlock(newPos, false)
+            helper.level.removeBlock(newPos.below(), false)
+            cleanup(network, tile)
+            BatteryServerConfig.chunkLoading.set(enabled)
+            sonar.fluxnetworks.FluxConfig.enableChunkLoading = fluxEnabled
         }
     }
 

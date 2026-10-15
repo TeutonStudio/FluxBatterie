@@ -23,8 +23,8 @@ object RuntimePatchGuard {
             val name = "sonar.fluxnetworks.$target"
             try {
                 val type = Class.forName(name, true, javaClass.classLoader)
-                val failure = runCatching { type.getDeclaredMethod("fluxBatteryPatchFailure").invoke(null) }.getOrNull()
-                check(failure == null) { "$failure" }
+                val failureMethod = try { type.getDeclaredMethod("fluxBatteryPatchFailure") } catch (_: NoSuchMethodException) { null }
+                check(failureMethod == null) { "${failureMethod!!.invoke(null)}" }
                 check(type.getDeclaredMethod("fluxBatteryPatchVersion").invoke(null) == 1) { "wrong patch marker" }
             } catch (error: Throwable) {
                 throw IllegalStateException("Flux Battery mandatory runtime patch failed for $name. Expected original Flux Networks 8.0.0 with compatible transformers. ${error.message}", error)

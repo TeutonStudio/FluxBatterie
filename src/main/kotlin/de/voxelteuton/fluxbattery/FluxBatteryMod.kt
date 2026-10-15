@@ -24,6 +24,11 @@ import sonar.fluxnetworks.api.FluxCapabilities
 class FluxBatteryMod(bus: IEventBus, container: ModContainer) {
     init {
         de.voxelteuton.fluxbattery.bridge.RuntimePatchGuard.verify()
+        if (!net.neoforged.fml.loading.FMLLoader.isProduction() && System.getProperty("fluxbattery.dedicatedRegression") == "true") {
+            NeoForge.EVENT_BUS.addListener<net.neoforged.neoforge.event.server.ServerStartedEvent> {
+                de.voxelteuton.fluxbattery.gametest.DedicatedRegressionReporter.install()
+            }
+        }
         ITEMS.register(bus)
         bus.addListener<net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent>(BatteryNetworking::register)
         ATTACHMENTS.register(bus)

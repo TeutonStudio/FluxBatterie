@@ -1,11 +1,84 @@
-Verifikation 15.10.2026, Europe/Berlin
+Verifikation 16.10.2026, Europe/Berlin
+Baseline: bridge-baseline-8.0.0 = e119495; previous evidence preserved separately.
+Final regular DedicatedServer and client load the packaged addon, excluding loose main output.
 
-MDK: BUILD SUCCESSFUL in 39s
-GameTests: [20:12:49] [Server thread/INFO] [minecraft/GameTestServer]: All 12 required tests passed :)
-Restart prepare: [20:06:39] [Server thread/INFO] [minecraft/GameTestServer]: All 11 required tests passed :)
-Restart verify: [20:07:54] [Server thread/INFO] [minecraft/GameTestServer]: All 11 required tests passed :)
-Client GUI: [20:15:50] [Render thread/INFO] [de.vo.fl.cl.ClientSmoke/]: Flux Battery client smoke screenshot captured
-Repack: BUILD SUCCESSFUL in 3s
-JUnit: 3 tests, 0 failures, 0 errors; 10000 randomized conservation cases
-fluxbattery-0.1.0-dev.jar SHA-256 3af80ee7f5468d145bd645f6f8814d23ea6ab478cb63199a52f0f9441715503a
-FluxNetworks-1.21.1-8.0.0-fluxbattery.1.jar SHA-256 c24c8592e5c596164e6333e0d581d0d023a0e98d89fd488e151ceea21c6c6a64
+Final build:
+Loader verification passed: 8 originals, 8 changed bodies, 8 missing methods, 8 changed method flags, 7 changed field flags, 8 changed superclasses
+BUILD SUCCESSFUL in 1s
+
+Packaged GameTestServer:
+[01:00:55] [Server thread/INFO] [minecraft/GameTestServer]: All 14 required tests passed :)
+
+Regular DedicatedServer:
+[01:11:33] [modloading-worker-0/INFO] [FluxBattery/]: Flux Battery: all mandatory original-8.0.0 runtime patches verified
+[01:11:35] [Server thread/INFO] [minecraft/DedicatedServer]: Done (0.658s)! For help, type "help"
+[01:11:36] [Server thread/INFO] [FluxBatteryDedicatedRegression/]: Dedicated regression PASS: moveandnetworkchange
+[01:11:37] [Server thread/INFO] [FluxBatteryDedicatedRegression/]: Dedicated regression PASS: sharedcapabilitiesandpersistence
+[01:11:37] [Server thread/INFO] [FluxBatteryDedicatedRegression/]: Dedicated regression PASS: chunkticketsandremoval
+[01:11:37] [Server thread/INFO] [FluxBatteryDedicatedRegression/]: Dedicated regression PASS: authorizationanddeletion
+[01:11:37] [Server thread/INFO] [FluxBatteryDedicatedRegression/]: Dedicated regression PASS: deletependingnetwork
+[01:11:37] [Server thread/INFO] [FluxBatteryDedicatedRegression/]: Dedicated regression PASS: breakpickupandreplacemachine
+[01:11:37] [Server thread/INFO] [FluxBatteryDedicatedRegression/]: Dedicated regression PASS: prioritysurgeandscarcity
+[01:11:37] [Server thread/INFO] [FluxBatteryDedicatedRegression/]: Dedicated regression PASS: longmaximumdemandandfullbattery
+[01:11:37] [Server thread/INFO] [FluxBatteryDedicatedRegression/]: Dedicated regression PASS: hosteddisplaycolorandsaturatedstatistics
+[01:11:37] [Server thread/INFO] [FluxBatteryDedicatedRegression/]: Dedicated regression PASS: sametickremoval
+[01:11:37] [Server thread/INFO] [FluxBatteryDedicatedRegression/]: Dedicated regression PASS: normalfluxdevices
+[01:11:37] [Server thread/INFO] [FluxBatteryDedicatedRegression/]: Dedicated regression PASS: digitalminerandtwomachines
+[01:11:37] [Server thread/INFO] [FluxBatteryDedicatedRegression/]: Dedicated regression PASS: maliciousconfigurationrequests
+[01:11:37] [Server thread/INFO] [FluxBatteryDedicatedRegression/]: Dedicated regression PASS: operatingdigitalminer
+[01:11:37] [Server thread/INFO] [FluxBatteryDedicatedRegression/]: DEDICATED REGRESSION COMPLETE: 14 required tests passed
+[01:11:37] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping the server
+[01:11:38] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+BUILD SUCCESSFUL in 13s
+
+Restart prepare:
+[01:01:50] [Server thread/INFO] [minecraft/GameTestServer]: All 15 required tests passed :)
+[01:03:03] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+BUILD SUCCESSFUL in 1m 31s
+
+Restart verify:
+[01:03:15] [Server thread/INFO] [minecraft/GameTestServer]: All 15 required tests passed :)
+[01:03:23] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+BUILD SUCCESSFUL in 19s
+
+Compatible fixtures:
+[01:08:49] [modloading-worker-0/INFO] [ne.ne.co.Co.fluxbattery_compatible_fixture/COREMODLOG]: FIXTURE applied: fluxbattery_compatible_fixture
+[01:08:54] [Server thread/INFO] [minecraft/GameTestServer]: All 14 required tests passed :)
+BUILD SUCCESSFUL in 21s
+
+Mandatory transformer conflict:
+[01:09:10] [modloading-worker-0/INFO] [ne.ne.co.Co.fluxbattery_conflict_fixture/COREMODLOG]: FIXTURE applied: fluxbattery_conflict_fixture
+[01:09:10] [modloading-worker-0/ERROR] [ne.ne.co.Co.fluxbattery/COREMODLOG]: Flux Battery mandatory patch failed: sonar/fluxnetworks/common/connection/ServerFluxNetwork: Error: Flux Battery: expected original Flux Networks 8.0.0; sonar/fluxnetworks/common/connection/ServerFluxNetwork: changed bytecode in onEndServerTick()V
+java.lang.IllegalStateException: Flux Battery mandatory runtime patch failed for sonar.fluxnetworks.common.connection.ServerFluxNetwork. Expected original Flux Networks 8.0.0 with compatible transformers. Error: Flux Battery: expected original Flux Networks 8.0.0; sonar/fluxnetworks/common/connection/ServerFluxNetwork: changed bytecode in onEndServerTick()V
+Caused by: java.lang.IllegalStateException: Error: Flux Battery: expected original Flux Networks 8.0.0; sonar/fluxnetworks/common/connection/ServerFluxNetwork: changed bytecode in onEndServerTick()V
+	Caused by 0: java.lang.IllegalStateException: Flux Battery mandatory runtime patch failed for sonar.fluxnetworks.common.connection.ServerFluxNetwork. Expected original Flux Networks 8.0.0 with compatible transformers. Error: Flux Battery: expected original Flux Networks 8.0.0; sonar/fluxnetworks/common/connection/ServerFluxNetwork: changed bytecode in onEndServerTick()V
+		java.lang.IllegalStateException: Flux Battery mandatory runtime patch failed for sonar.fluxnetworks.common.connection.ServerFluxNetwork. Expected original Flux Networks 8.0.0 with compatible transformers. Error: Flux Battery: expected original Flux Networks 8.0.0; sonar/fluxnetworks/common/connection/ServerFluxNetwork: changed bytecode in onEndServerTick()V
+	Exception message: java.lang.IllegalStateException: Error: Flux Battery: expected original Flux Networks 8.0.0; sonar/fluxnetworks/common/connection/ServerFluxNetwork: changed bytecode in onEndServerTick()V
+	  java.lang.IllegalStateException: Flux Battery mandatory runtime patch failed for sonar.fluxnetworks.common.connection.ServerFluxNetwork. Expected original Flux Networks 8.0.0 with compatible transformers. Error: Flux Battery: expected original Flux Networks 8.0.0; sonar/fluxnetworks/common/connection/ServerFluxNetwork: changed bytecode in onEndServerTick()V
+
+Unsupported version:
+		Flux Networks 8.0.1 (fluxnetworks)
+	Mod ID: 'fluxnetworks', Requested by: 'fluxbattery', Expected range: '[8.0.0,8.0.0]', Actual version: '8.0.1'
+[01:09:18] [main/FATAL] [ne.ne.fm.ModLoader/CORE]: Error during pre-loading phase: Mod fluxbattery requires fluxnetworks 8.0.0
+Currently, fluxnetworks is 8.0.1
+	Failure message: Mod fluxbattery requires fluxnetworks 8.0.0
+		Currently, fluxnetworks is 8.0.1
+	- Mod fluxbattery requires fluxnetworks 8.0.0
+	  Currently, fluxnetworks is 8.0.1
+
+Modified 8.0.0 JAR:
+java.lang.IllegalStateException: Flux Battery requires the unchanged Flux Networks 8.0.0 JAR (SHA-256 29e511b2d76f85bd247aa213a92bb059ecc037fcc3fed82baffcff97b638d3a6); found 5d719f8eb1d6e7eea1fca5f6b26755dcac772ef9cef0181b4a130dae724ce579. Remove replacement/modified Flux JARs.
+		java.lang.IllegalStateException: Flux Battery requires the unchanged Flux Networks 8.0.0 JAR (SHA-256 29e511b2d76f85bd247aa213a92bb059ecc037fcc3fed82baffcff97b638d3a6); found 5d719f8eb1d6e7eea1fca5f6b26755dcac772ef9cef0181b4a130dae724ce579. Remove replacement/modified Flux JARs.
+	Exception message: java.lang.IllegalStateException: Flux Battery requires the unchanged Flux Networks 8.0.0 JAR (SHA-256 29e511b2d76f85bd247aa213a92bb059ecc037fcc3fed82baffcff97b638d3a6); found 5d719f8eb1d6e7eea1fca5f6b26755dcac772ef9cef0181b4a130dae724ce579. Remove replacement/modified Flux JARs.
+	  java.lang.IllegalStateException: Flux Battery requires the unchanged Flux Networks 8.0.0 JAR (SHA-256 29e511b2d76f85bd247aa213a92bb059ecc037fcc3fed82baffcff97b638d3a6); found 5d719f8eb1d6e7eea1fca5f6b26755dcac772ef9cef0181b4a130dae724ce579. Remove replacement/modified Flux JARs.
+
+Packaged client:
+[01:11:46] [modloading-worker-0/INFO] [ne.ne.co.Co.fluxbattery/COREMODLOG]: Flux Battery runtime patch applied: sonar/fluxnetworks/common/connection/ClientFluxNetwork
+[01:11:46] [modloading-worker-0/INFO] [FluxBattery/]: Flux Battery: all mandatory original-8.0.0 runtime patches verified
+[01:11:51] [Render thread/INFO] [de.vo.fl.cl.ClientSmoke/]: Flux Battery client smoke screenshot captured
+BUILD SUCCESSFUL in 11s
+
+JUnit: 3 tests, 0 failures, 0 errors; 10000 deterministic conservation cases
+fluxbattery-0.1.0-dev.jar SHA-256 7872b38808dca9a4d97a4de00d8161f19d6acbf2c6caf0bedd85782fbe23ec3a
+FluxNetworks-1.21.1-8.0.0.jar SHA-256 29e511b2d76f85bd247aa213a92bb059ecc037fcc3fed82baffcff97b638d3a6
+Distribution: no sonar/ entries, no tooling or compatibility-fixture classes; pristine upstream input.

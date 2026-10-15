@@ -12,8 +12,8 @@ for stage in ("prepare", "verify"):
     log = root / f"build/restart-{stage}.log"
     log.parent.mkdir(exist_ok=True)
     with log.open("w") as output:
-        result = subprocess.run([str(root / "gradlew"), "runGameTestServer", f"-PrestartStage={stage}", "--no-daemon", "--max-workers=2"], cwd=root, stdout=output, stderr=subprocess.STDOUT)
+        result = subprocess.run([str(root / "gradlew"), "runGameTestServer", f"-PrestartStage={stage}", "-PpackagedAddon", "--offline", "--no-daemon", "--max-workers=2"], cwd=root, stdout=output, stderr=subprocess.STDOUT, timeout=300)
     text = log.read_text(errors="replace")
-    if result.returncode or not re.search(r"All \d+ required tests passed", text):
+    if "all mandatory original-8.0.0 runtime patches verified" not in text or result.returncode or not re.search(r"All \d+ required tests passed", text):
         raise SystemExit(f"Restart {stage} failed; inspect {log}")
-    print(f"Restart {stage}: passed ({log})")
+    print(f"Restart {stage}: passed ({log})", flush=True)

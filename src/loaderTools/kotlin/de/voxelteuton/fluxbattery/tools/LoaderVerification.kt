@@ -32,7 +32,7 @@ object LoaderVerification {
                 val methods = if (name.endsWith("TileFluxDevice")) node.methods.filter { it.name in listOf("getTransferHandler", "markEnergyChanged", "disconnect", "sendBlockUpdate") }
                     else if (name.endsWith("Messages")) node.methods.filter { m -> m.instructions.toArray().any { it is InvokeDynamicInsnNode && it.bsmArgs.any { a -> a is org.objectweb.asm.Handle && a.name == "sendBlockUpdate" } } }
                     else node.methods
-                quote(name) + ": {\"fields\":" + node.fields.joinToString(",", "[", "]") { quote(it.name + ":" + it.desc) } + ",\"methods\":" + methods.joinToString(",", "{", "}") { quote(it.name + it.desc) + ":" + quote(inv.invokeFunction("shape", it).toString()) } + "}"
+                quote(name) + ": {\"superName\":" + quote(node.superName) + ",\"fields\":" + node.fields.joinToString(",", "[", "]") { quote(it.name + ":" + it.desc + ":" + it.access) } + ",\"methods\":" + methods.joinToString(",", "{", "}") { quote(it.name + it.desc) + ":" + quote(inv.invokeFunction("shape", it).toString()) } + "}"
             }
             Files.writeString(manifest, data)
             println("Generated original 8.0.0 executable shapes: $manifest")
@@ -51,11 +51,26 @@ object LoaderVerification {
             inv.invokeFunction("transform", changed)
             check(changed.methods.none { it.name == "fluxBatteryPatchVersion" }) { "Changed bytecode accepted: $name" }
             check(changed.methods.any { it.name == "fluxBatteryPatchFailure" }) { "Missing incompatibility diagnostic: $name" }
+            val access = original(name)
+            access.methods.first { it.name == specMethod.name && it.desc == specMethod.desc }.access = specMethod.access xor Opcodes.ACC_STATIC
+            inv.invokeFunction("transform", access)
+            check(access.methods.none { it.name == "fluxBatteryPatchVersion" }) { "Changed method access accepted: $name" }
+            val fieldAccess = original(name)
+            if (fieldAccess.fields.isNotEmpty()) {
+                fieldAccess.fields.first().access = fieldAccess.fields.first().access xor Opcodes.ACC_STATIC
+                inv.invokeFunction("transform", fieldAccess)
+                check(fieldAccess.methods.none { it.name == "fluxBatteryPatchVersion" }) { "Changed field access accepted: $name" }
+            }
+            val superclass = original(name)
+            superclass.superName = "java/lang/UnsupportedOperationException"
+            inv.invokeFunction("transform", superclass)
+            check(superclass.methods.none { it.name == "fluxBatteryPatchVersion" }) { "Changed superclass accepted: $name" }
             val missing = original(name)
             missing.methods.removeIf { it.name == specMethod.name && it.desc == specMethod.desc }
             inv.invokeFunction("transform", missing)
             check(missing.methods.none { it.name == "fluxBatteryPatchVersion" }) { "Missing method accepted: $name" }
         }
-        println("Loader verification passed: 8 originals, 8 changed bodies, 8 missing methods")
+        val fieldTargets = names.count { original(it).fields.isNotEmpty() }
+        println("Loader verification passed: 8 originals, 8 changed bodies, 8 missing methods, 8 changed method flags, $fieldTargets changed field flags, 8 changed superclasses")
     }
 }

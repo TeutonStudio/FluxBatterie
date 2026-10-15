@@ -1,4 +1,4 @@
-package de.voxelteuton.fluxbattery.mixin
+package de.voxelteuton.fluxbattery.compat
 
 import sonar.fluxnetworks.common.connection.FluxNetwork
 import org.spongepowered.asm.mixin.Mixin

@@ -1,4 +1,4 @@
-# API-Analyse — 15.10.2026
+# API-Analyse — 16.10.2026
 
 ## Festgelegte Quellen und Artefakte
 
@@ -39,21 +39,15 @@ Releasequellen:
 
 ## Architekturentscheidung
 
-**Minimaler Flux-Fork auf Release 8.0.0 erforderlich.** Das unveränderte JAR bietet keinen zuverlässigen Registrierungseinstieg für ein Nicht-Tile. Die Alternative würde mehrere interne Listen, Iteratoren, Methodensignaturen und Statistikpfade durch Mixins ersetzen. Die Bridge soll `IFluxRuntimeDevice extends IFluxDevice` für Handler, Energieänderung und Abmeldung ergänzen. Bestehende Tiles implementieren sie; aktive Listen/Queues werden darauf umgestellt. `Messages` enthält zusätzlich einen `TileFluxDevice::sendBlockUpdate`-Aufrufer, der getrennt berücksichtigt werden muss. Position, Speicherformate und normale Gerätereihenfolge bleiben erhalten.
+**Original-JAR mit Ladezeit-Erweiterung.** Das Original bietet keinen Nicht-Tile-Registrierungseinstieg; der isolierte Prototyp hat die erforderliche ABI-Erweiterung unter NeoForge 21.1.231 auf Client und Dedicated Server nachgewiesen. Ein Coremod erweitert gezielt die originalen Klassen, deren Laufzeit bleibt Flux Networks. `FluxRuntimeDevice` und `FluxRuntimeNetwork` liegen vollständig unter `de.voxelteuton.fluxbattery.bridge`.
 
-## Kompatibilitätsmatrix
+Aktive Listen, Warteschlangen, Iteratoren, Lambda-Handles und Statistikzugriffe werden von Tile auf Runtime-Teilnehmer verallgemeinert. Die alten Tile-Registrierungssignaturen und `PhantomFluxDevice.makeUnloaded(TileFluxDevice)` bleiben als Delegationsüberladungen erhalten. Die neue Iterator-Rückgabe dient internen Runtime-Pfaden; die alte Tile-Rückgabe bleibt für Tile-Teilnehmer vorhanden, kann für Hosted Points aber keinen Tile liefern. Addons dürfen aktive Teilnehmer deshalb nicht pauschal auf TileFluxDevice casten.
 
-| Komponente | Ausgangspunkt | Stand |
-|---|---|---|
-| Minecraft | 1.21.1 | MDK-Ziel |
-| NeoForge | 21.1.231 | MDK-Version, noch kein Laufzeitnachweis |
-| ModDevGradle | 2.0.141 | MDK-Version |
-| Java | 21 | Toolchain-Download erforderlich; Host hat Java 25 |
-| Kotlin / KFF | 2.1.21 / 5.9.0 | POM verifiziert; Starts noch offen |
-| Mekanism | 10.7.19.85 | Laufzeit- und Sources-JAR heruntergeladen |
-| Flux Networks | 8.0.0 + Bridge | Original-JAR heruntergeladen, Fork noch offen |
+`Messages` enthält einen getrennt gepatchten Methodenverweis für Blockupdates. Normale Tiles behalten ihre Implementierung, Hosted Points implementieren den Hook leer. `ServerFluxNetwork.onEndServerTick()` bleibt der einzige Verteiler; dort wird ausschließlich die Summenaddition gesättigt. Warteschlangen- und Löschkorrekturen entsprechen der historischen Bridge, einschließlich noch ausstehender Anmeldungen.
 
-Die Matrix ist keine Laufzeitfreigabe. Build, Client und Dedicated Server werden in `test-results.md` getrennt erfasst.
+CoreMods 7.0.3 und ModLauncher 11.0.5 stammen aus der tatsächlich verwendeten Loaderkombination. Reihenfolge: BEFORE-Plugins, PRE_CLASS, Feld-/Method-Transformer, CLASS-Coremods, AFTER-Plugins/Mixins. Mehrere Klassen-Coremods besitzen keine vom Addon garantierte Reihenfolge. Ausführbare Strukturen werden vor dem Patch verglichen; ein obligatorischer Startguard verhindert auch nach vom Coremod-Framework abgefangenen Fehlern die Modinitialisierung.
+
+Die vollständigen ursprünglichen Vergleichstests stehen unter `bridge-baseline-test-results.md`; aktuelle Ausführungsergebnisse und genaue Kombinationen unter `test-results.md`.
 
 ## Bestätigte Mekanism-Einstiegspunkte (10.7.19.85 Sources-JAR)
 
@@ -68,8 +62,8 @@ Die Matrix ist keine Laufzeitfreigabe. Build, Client und Dedicated Server werden
 
 ## Bestätigte Build-/Laufzeitkombination
 
-Der unveränderte MDK-Grundbuild war mit Java 21 erfolgreich. Auch das Kotlin-Projekt kompiliert mit Kotlin 2.1.21, KFF 5.9.0, ModDevGradle 2.0.141 und Gradle 9.2.1. NeoForge 21.1.231 lädt Mekanism 10.7.19.85 und die Flux-Bridge auf dem Dedicated Server bis zur Done-Meldung. Der KFF-Clientsubscriber eines Kotlin-`object` benötigt Instanzmethoden, kein `@JvmStatic`. Statische Kotlin-Mixin-Injektionen funktionieren mit **privatem Companion**; durch Maschinen-GameTests praktisch bestätigt.
+Der unveränderte MDK-Grundbuild war mit Java 21 erfolgreich. Auch das Kotlin-Projekt kompiliert mit Kotlin 2.1.21, KFF 5.9.0, ModDevGradle 2.0.141 und Gradle 9.2.1. NeoForge 21.1.231 lädt Mekanism 10.7.19.85, das originale Flux Networks 8.0.0 und Flux Battery auf dem Dedicated Server bis zur Done-Meldung. Der KFF-Clientsubscriber eines Kotlin-`object` benötigt Instanzmethoden, kein `@JvmStatic`. Statische Kotlin-Mixin-Injektionen funktionieren mit **privatem Companion**; durch Maschinen-GameTests praktisch bestätigt.
 
 Mekanisms JAR-Dateiname enthält `.85`, seine Mod-Metadaten melden jedoch `10.7.19`. Die TOML-Abhängigkeit prüft diesen tatsächlichen Wert; die Build-Abhängigkeit bleibt exakt auf Artefakt 10.7.19.85 festgelegt.
 
-Die Java-Quellbäume des aktuellen Flux-Zweigs und des Release-Commits wurden vollständig verglichen: keine Java-Differenzen. Der Branch unterscheidet sich in Buildskripten/Versionsdeklarationen. Der Abgleich mit dem veröffentlichten JAR umfasst die öffentlichen Signaturen der Bridge-Einstiegspunkte und die byteweise Erhaltung sämtlicher nicht ersetzter JAR-Einträge; es wird keine vollständige Bytecodeidentität von neu kompilierten Quellen behauptet.
+Die Java-Quellbäume des aktuellen Flux-Zweigs und des Release-Commits wurden vollständig verglichen: keine Java-Differenzen. Der Branch unterscheidet sich in Buildskripten/Versionsdeklarationen. Das veröffentlichte JAR wird zur Build- und Laufzeit anhand SHA-256 geprüft und niemals neu gepackt. `verifyLoader` prüft die ASM-Strukturen aller acht Zielklassen am Original; `verify-distribution.py` schließt `sonar/`-Einträge im Addon aus.

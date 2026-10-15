@@ -3,6 +3,6 @@
   "minVersion": "0.8",
   "package": "de.voxelteuton.fluxbattery.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": ["EnergySlotMixin", "BasicSlotMixin", "MekanismTickMixin", "FluxLoadOrderMixin"],
+  "mixins": ["EnergySlotMixin", "BasicSlotMixin", "MekanismTickMixin"],
   "injectors": {"defaultRequire": 1}
 }

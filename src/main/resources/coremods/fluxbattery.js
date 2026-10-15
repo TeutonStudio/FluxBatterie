@@ -29,7 +29,7 @@ function method(node, name, desc) {
 }
 // Executable opcode/member/constant/branch shape, independent of frames and debug info.
 function shape(m) {
-    var a = m.instructions.toArray(), labels = {}, position = 0, out = [];
+    var a = m.instructions.toArray(), labels = {}, position = 0, out = ['access:' + m.access];
     for (var i = 0; i < a.length; i++) {
         if (a[i].getType() === 8) labels[a[i].getLabel().toString()] = position;
         if (a[i].getOpcode() >= 0) position++;
@@ -63,18 +63,20 @@ function shape(m) {
         }
         out.push(s);
     }
+    for each (var block in m.tryCatchBlocks) out.push('try:' + labels[block.start.getLabel().toString()] + ':' + labels[block.end.getLabel().toString()] + ':' + labels[block.handler.getLabel().toString()] + ':' + block.type);
     return out.join('|');
 }
 function validate(node) {
     var spec = expected[node.name];
     if (!spec) fail('unknown target ' + node.name);
+    if (node.superName !== spec.superName) fail(node.name + ': changed superclass ' + node.superName);
     for (var key in spec.methods) {
         var split = key.indexOf('('), m = method(node, key.substring(0,split), key.substring(split));
         if (shape(m) !== spec.methods[key]) fail(node.name + ': changed bytecode in ' + key);
     }
     for each (var field in spec.fields) {
         var found = false;
-        for each (var f in node.fields) if (f.name + ':' + f.desc === field) found = true;
+        for each (var f in node.fields) if (f.name + ':' + f.desc + ':' + f.access === field) found = true;
         if (!found) fail(node.name + ': missing field ' + field);
     }
     for each (var m in node.methods) if (m.name === 'fluxBatteryPatchVersion') fail(node.name + ': already patched');

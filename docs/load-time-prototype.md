@@ -1,5 +1,7 @@
 # Ladezeit-Prototyp (16.10.2026)
 
+Der Prototyp ist in Commit `16cea0f` reproduzierbar. Die Probeklassen werden im endgültigen Addon nicht ausgeliefert; die Mixin-Probe liegt jetzt im getrennten Testfixture. `-PloadTimePrototype` gehört ausschließlich zu diesem historischen Commit.
+
 Referenz: `bridge-baseline-8.0.0` = `e119495`. Bridge-SHA256: `c24c8592e5c596164e6333e0d581d0d023a0e98d89fd488e151ceea21c6c6a64`.
 
 Der erste isolierte Commit ergänzt nur `LoadTimePatched` und eine konstante Methode an der originalen `FluxNetwork`-Klasse. `-PloadTimePrototype` lädt ausschließlich `libs/FluxNetworks-1.21.1-8.0.0.jar`; die alten Ersatzklassen dienen in dieser Stufe ausschließlich noch als Compile-ABI. Energie-/Hostpfade werden im Prototyp nicht ausgeführt.

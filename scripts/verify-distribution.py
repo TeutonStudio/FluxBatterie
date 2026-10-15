@@ -16,7 +16,8 @@ with zipfile.ZipFile(addon) as jar:
     assert 'META-INF/coremods.json' in entries
     assert 'coremods/fluxbattery.js' in entries
     assert 'coremods/fluxbattery-8.0.0.json' in entries
-    assert not any(n.startswith('de/voxelteuton/fluxbattery/tools/') for n in entries)
+    assert not any(n.startswith(('de/voxelteuton/fluxbattery/tools/', 'de/voxelteuton/fluxbattery/compat/')) for n in entries)
+    assert 'de/voxelteuton/fluxbattery/bridge/LoadTimePatched.class' not in entries
 for path in (root / 'build/moddev').rglob('*'):
     if path.is_file() and path.suffix in ('.txt', '.args'):
         text = path.read_text(errors='replace')

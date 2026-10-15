@@ -16,21 +16,36 @@ repositories {
     maven("https://modmaven.dev/")
     maven("https://cursemaven.com") { content { includeGroup("curse.maven") } }
 }
+// Packaged smoke runs exclude loose main output, preventing a resource-only duplicate mod.
+val packagedRun = if (project.hasProperty("packagedAddon")) sourceSets.create("packagedRun").apply {
+    runtimeClasspath += sourceSets.main.get().runtimeClasspath - sourceSets.main.get().output
+} else null
 neoForge {
     version = "21.1.231"
     runs {
+        configureEach { if (packagedRun != null) sourceSet.set(packagedRun) }
         create("client") { client(); gameDirectory = file("run-client"); if (project.hasProperty("clientSmoke")) systemProperty("fluxbattery.clientSmoke", "true") }
-        create("server") { server(); programArgument("--nogui") }
-        create("gameTestServer") { type = "gameTestServer"; gameDirectory = file(if (project.hasProperty("restartStage")) "run-restart" else "run-gametest"); if (project.hasProperty("restartStage")) systemProperty("fluxbattery.restartStage", project.property("restartStage").toString()); systemProperty("neoforge.enabledGameTestNamespaces", "fluxbattery") }
+        create("server") {
+            server(); programArgument("--nogui")
+            if (project.hasProperty("dedicatedRegression")) {
+                systemProperty("fluxbattery.dedicatedRegression", "true")
+                systemProperty("neoforge.enableGameTest", "true")
+                systemProperty("neoforge.enabledGameTestNamespaces", "fluxbattery")
+            }
+        }
+        create("gameTestServer") { type = "gameTestServer"; gameDirectory = file(if (project.hasProperty("restartStage")) "run-restart" else "run-gametest"); if (project.hasProperty("restartStage")) systemProperty("fluxbattery.restartStage", project.property("restartStage").toString()); systemProperty("neoforge.enabledGameTestNamespaces", "fluxbattery"); if (project.hasProperty("compatFixture")) systemProperty("fluxbattery.compatFixture", "true") }
     }
-    mods { create("fluxbattery") { sourceSet(sourceSets.main.get()) } }
+    mods { if (!project.hasProperty("packagedAddon")) create("fluxbattery") { sourceSet(sourceSets.main.get()) } }
 }
 val originalFlux = files("libs/FluxNetworks-1.21.1-8.0.0.jar")
 dependencies {
     implementation("thedarkcolour:kotlinforforge-neoforge:5.9.0")
     implementation("mekanism:Mekanism:1.21.1-10.7.19.85")
-    implementation(originalFlux)
+    if (project.hasProperty("packagedAddon")) runtimeOnly(files(tasks.named("jar")))
+    compileOnly(originalFlux)
+    runtimeOnly(files(providers.gradleProperty("fluxRuntimeJar").getOrElse(originalFlux.singleFile.path)))
     if (project.hasProperty("compatFixture")) runtimeOnly(files(project.property("compatFixture")))
+    if (project.hasProperty("compatFixtureExtra")) runtimeOnly(files(project.property("compatFixtureExtra")))
 
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
@@ -54,11 +69,27 @@ dependencies {
     add(loaderTools.implementationConfigurationName, "org.openjdk.nashorn:nashorn-core:15.4")
 }
 tasks.register<JavaExec>("generateFluxShapes") {
+    dependsOn(verifyFluxInput)
     classpath = loaderTools.runtimeClasspath
     mainClass.set("de.voxelteuton.fluxbattery.tools.LoaderVerification")
     args("generate")
 }
 val verifyLoader by tasks.registering(JavaExec::class) {
+    dependsOn(verifyFluxInput)
     classpath = loaderTools.runtimeClasspath
     mainClass.set("de.voxelteuton.fluxbattery.tools.LoaderVerification")
 }
+
+// Separate external test mod: exercises an AFTER-phase Mixin against FluxNetwork.
+val compatFixture by sourceSets.creating
+compatFixture.compileClasspath += sourceSets.main.get().compileClasspath
+tasks.register<Jar>("compatFixtureJar") {
+    archiveFileName.set("fluxbattery-mixin-fixture.jar")
+    destinationDirectory.set(layout.buildDirectory.dir("fixtures"))
+    from(compatFixture.output)
+}
+
+// Dedicated-server smoke tests and local development can issue a clean console stop.
+tasks.named<JavaExec>("runServer") { standardInput = System.`in` }
+// If maintenance generation and build are requested together, package the newly generated schema.
+tasks.named("processResources") { mustRunAfter("generateFluxShapes") }
