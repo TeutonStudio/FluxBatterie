@@ -1,0 +1,8 @@
+Original FluxNetworks SHA256: 29e511b2d76f85bd247aa213a92bb059ecc037fcc3fed82baffcff97b638d3a6
+[00:36:22] [main/INFO] [ne.ne.fm.lo.FMLServiceProvider/CORE]: Loading coremod script-engine for [fluxbattery]
+[00:36:23] [main/INFO] [ne.ne.co.Co.fluxbattery/COREMODLOG]: Flux Battery prototype: FluxNetwork extended before definition; no Kotlin classes resolved
+[00:36:30] [modloading-worker-0/INFO] [th.ko.ne.te.KotlinForForge/]: Kotlin For Forge Enabled!
+[00:36:30] [modloading-worker-0/INFO] [ne.ne.co.Co.fluxbattery/COREMODLOG]: Flux Battery prototype: FluxNetwork extended before definition; no Kotlin classes resolved
+[00:36:30] [modloading-worker-0/INFO] [FluxBattery/]: Flux Battery prototype: Kotlin ABI available during mod construction after early transformation
+[00:36:38] [Render thread/INFO] [de.vo.fl.cl.ClientSmoke/]: Flux Battery client smoke screenshot captured
+BUILD SUCCESSFUL in 24s

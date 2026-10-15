@@ -56,7 +56,7 @@ dependencies {
     implementation("mekanism:Mekanism:1.21.1-10.7.19.85")
     // Compile original ABI plus replacement classes; only the patched jar is loaded at runtime.
     compileOnly(originalFlux)
-    runtimeOnly(files(patchedFlux))
+    runtimeOnly(if (project.hasProperty("loadTimePrototype")) originalFlux else files(patchedFlux))
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
 }
