@@ -1,25 +1,56 @@
+# Flux Battery
 
-Installation information
-=======
+Kotlin-Addon für Minecraft **1.21.1 / NeoForge**. Eine konfigurierte Batterie im Energie-Eingabeslot einer Mekanism-Maschine arbeitet als virtueller Flux Point. Die Energie fließt vom normalen Flux-Netzwerk in die Batterie und von dort über Mekanisms Item-Energieadapter in die Maschine. Ein Flux Controller oder zusätzlicher Point an der Maschine ist dafür nicht erforderlich.
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+## Installation
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+Auf Client und Server installieren:
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+- NeoForge **21.1.231**, Java **21**
+- Mekanism **1.21.1-10.7.19.85** (interne Mod-Version `10.7.19`)
+- Kotlin for Forge **5.9.0** (NeoForge-Version)
+- `fluxbattery-0.1.0-dev.jar` aus `build/libs/`
+- `FluxNetworks-1.21.1-8.0.0-fluxbattery.1.jar` aus `build/bridge/`
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+**Das Bridge-JAR ersetzt Flux Networks 8.0.0. Original und Bridge niemals gleichzeitig installieren. Das unveränderte Flux-JAR genügt nicht.** Bestehende Mod-ID und Speicherformate bleiben erhalten. Weitere optionale Flux-Integrationsmods sind für die hier getestete Kombination nicht erforderlich.
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+## Bedienung
+
+1. Batterie herstellen: `IFI / ETE / IFI`; I = Eisenbarren, F = Flux Core, E = Redstone, T = Mekanism Energy Tablet. Alternativ Kreativtab „Tools & Utilities“.
+2. Batterie halten und **Shift-Rechtsklick** ausführen.
+3. Ein zugängliches Netzwerk auswählen, Name, Priorität, FE-Limit pro Zyklus, unbegrenztes Limit, Surge und optional Chunkloading einstellen; speichern.
+4. Batterie in den Energie-Eingabeslot des Digital Miners einsetzen. Leere konfigurierte Batterien werden ebenfalls angenommen.
+5. Netzwerk benötigt eine Energiequelle an einem regulären Flux Plug. Versorgung und Priorisierung erfolgen durch Flux Networks.
+6. Entnehmen beendet Verbindung und Chunk-Ticket. Dieselbe Batterie kann anschließend in eine andere geeignete Maschine eingesetzt werden.
+
+Privat-/verschlüsselte Netzwerke erfordern dauerhafte Besitzer- oder Mitgliedsrechte. Passwörter werden nicht gespeichert. Nur der Batterie-Besitzer kann ihre Konfiguration bearbeiten. Netzwerkrechte werden während des Betriebs erneut geprüft.
+
+Getestet: Digital Miner (tatsächlicher Erzabbau), Enrichment Chamber, Energized Smelter. Der gemeinsame Adapter unterstützt weitere Mekanism-Maschinen mit `fill`-/`fillOrConvert`-Energieslots. Komplexe `IMultiblock`-Maschinen sind ausgeschlossen. Bei mehreren Batterieslots arbeitet nur die Batterie im ersten passenden Slot als Point; weitere bleiben normale Energieitems.
+
+## Serverkonfiguration
+
+`fluxbattery-server.toml` (NeoForge bestimmt den weltabhängigen Ablageort):
+
+```toml
+allowChunkLoading = false
+maxTicketsPerOwner = 4
+batteryCapacityFE = 1000000000
+```
+
+Chunkloading benötigt zusätzlich die aktivierte Option im Item, gültige Netzwerkrechte und die globale Flux-Networks-Chunkloading-Freigabe. Das Kontingent gilt pro Batterie-Besitzer über alle Dimensionen. Jede Batterie hält nur ihren Maschinenchunk tickend geladen. Ein Digital Miner kann zusätzlich Mekanisms reguläres Anchor-Upgrade benötigen, wenn sein Abbaubereich weitere Chunks umfasst; die Batterie übernimmt diese zusätzlichen Chunks nicht.
+
+## Bauen und prüfen
+
+```bash
+python3 scripts/bootstrap-dependencies.py
+./gradlew build
+./gradlew runGameTestServer
+python3 scripts/test-restart.py
+./gradlew runClient -PclientSmoke
+```
+
+Java 21 über `JAVA_HOME` auswählen; Gradle kann die Toolchain alternativ herunterladen. Der unveränderte MDK-Wrapper ist Gradle **9.2.1**, ModDevGradle **2.0.141**, Kotlin **2.1.21**. Die Bootstrap-Datei lädt nur das festgelegte Original-Flux-JAR und prüft SHA-256; Gradle lädt Mekanism/KFF aus den festgelegten Maven-Repositories. `build` erzeugt beide benötigten Mod-JARs. Der Client-Smoke-Test zeigt eine synthetische Konfigurationsvorschau, speichert `docs/evidence/battery-screen.png` und beendet den Client.
+
+## Entwicklungsstand
+
+Build- und Laufzeitnachweise, noch manuell zu prüfende Szenarien sowie genaue Einschränkungen stehen in [docs/test-results.md](docs/test-results.md). Die automatisierten Tests ersetzen keinen Langzeit- oder Modpack-Test. Architektur: [docs/architecture.md](docs/architecture.md). Upstream-Abweichungen: [docs/flux-network-bridge.md](docs/flux-network-bridge.md).
