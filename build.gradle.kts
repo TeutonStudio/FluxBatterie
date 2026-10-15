@@ -73,3 +73,19 @@ val verifyFluxInput by tasks.registering {
     }
 }
 tasks.named(bridge.compileJavaTaskName) { dependsOn(verifyFluxInput) }
+
+// Offline loader tooling never forms part of the delivered mod.
+val loaderTools by sourceSets.creating
+dependencies {
+    for (module in listOf("asm-tree", "asm-commons", "asm-util")) add(loaderTools.implementationConfigurationName, "org.ow2.asm:$module:9.8")
+    add(loaderTools.implementationConfigurationName, "org.openjdk.nashorn:nashorn-core:15.4")
+}
+tasks.register<JavaExec>("generateFluxShapes") {
+    classpath = loaderTools.runtimeClasspath
+    mainClass.set("de.voxelteuton.fluxbattery.tools.LoaderVerification")
+    args("generate")
+}
+val verifyLoader by tasks.registering(JavaExec::class) {
+    classpath = loaderTools.runtimeClasspath
+    mainClass.set("de.voxelteuton.fluxbattery.tools.LoaderVerification")
+}

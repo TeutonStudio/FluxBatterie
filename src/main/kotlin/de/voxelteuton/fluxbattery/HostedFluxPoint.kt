@@ -1,5 +1,7 @@
 package de.voxelteuton.fluxbattery
 
+import de.voxelteuton.fluxbattery.bridge.*
+
 import mekanism.common.inventory.slot.EnergyInventorySlot
 import mekanism.common.tile.base.TileEntityMekanism
 import net.minecraft.core.GlobalPos
@@ -17,7 +19,7 @@ class HostedFluxPoint(
     val slot: EnergyInventorySlot,
     val binding: BatteryHostLifecycle,
     val network: FluxNetwork
-) : IFluxRuntimeDevice, IFluxPoint {
+) : FluxRuntimeDevice, IFluxPoint {
     var active = true
     var ticket = false
     private val handler = HostedPointTransferHandler(this)
@@ -30,10 +32,11 @@ class HostedFluxPoint(
         if (!active) return
         active = false
         if (!preserveTicket) BatteryChunkTicketController.release(this)
-        network.enqueueConnectionRemoval(this, false)
+        network.unregisterRuntime(this, false)
     }
+    override fun sendBlockUpdate() {} // A hosted Point has no Flux block renderer.
     override fun disconnect() { FluxBatteryHostManager.remove(tile) }
-    override fun getTransferHandler() = handler
+    override val transferHandler get() = handler
     override fun markEnergyChanged() { tile.setChanged() }
     override fun getNetworkID() = binding.configuration.networkId
     override fun getOwnerUUID() = binding.configuration.ownerUuid

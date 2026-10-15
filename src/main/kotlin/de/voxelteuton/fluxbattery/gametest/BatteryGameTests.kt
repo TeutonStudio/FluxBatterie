@@ -1,5 +1,7 @@
 package de.voxelteuton.fluxbattery.gametest
 
+import de.voxelteuton.fluxbattery.bridge.*
+
 import de.voxelteuton.fluxbattery.*
 import mekanism.api.Action
 import mekanism.api.AutomationType
@@ -17,7 +19,7 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory
 import net.neoforged.neoforge.gametest.GameTestHolder
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate
 import sonar.fluxnetworks.api.FluxCapabilities
-import sonar.fluxnetworks.api.device.IFluxRuntimeDevice
+import de.voxelteuton.fluxbattery.bridge.FluxRuntimeDevice
 import sonar.fluxnetworks.api.network.SecurityLevel
 import sonar.fluxnetworks.common.connection.FluxNetwork
 import sonar.fluxnetworks.common.connection.FluxNetworkData
@@ -100,7 +102,7 @@ class BatteryGameTests {
         slot.setEmpty()
         network.onEndServerTick()
         check(network.getConnectionByPos(GlobalPos.of(helper.level.dimension(), tile.blockPos)) == null)
-        check(network.getLogicalDevices(FluxNetwork.POINT).isEmpty())
+        check(network.runtimeDevices(FluxNetwork.POINT).isEmpty())
         cleanup(network, tile)
         helper.succeed()
     }
@@ -114,7 +116,7 @@ class BatteryGameTests {
         network.onEndServerTick()
         check(slots.all { BatteryStateService.energy(it.stack).storedEnergy == 1000L })
         check(plug.transferHandler.buffer == 0L)
-        check(network.getLogicalDevices(FluxNetwork.POINT).size == 3)
+        check(network.runtimeDevices(FluxNetwork.POINT).size == 3)
         slots.forEachIndexed { i, slot ->
             val before = tiles[i].getEnergyContainers(null).sumOf { it.energy }
             slot.fillContainerOrConvert()
@@ -123,7 +125,7 @@ class BatteryGameTests {
             check(slot.extractItem(1, Action.EXECUTE, AutomationType.MANUAL).item is FluxBatteryItem)
         }
         network.onEndServerTick()
-        check(network.getLogicalDevices(FluxNetwork.POINT).isEmpty())
+        check(network.runtimeDevices(FluxNetwork.POINT).isEmpty())
         cleanup(network, *tiles.toTypedArray())
         helper.succeed()
     }
@@ -140,7 +142,7 @@ class BatteryGameTests {
         check(BatteryStateService.energy(a.stack).storedEnergy == 100L)
         check(BatteryStateService.energy(b.stack).storedEnergy == 50L)
         check(plug.transferHandler.buffer == 0L)
-        val changes = network.getLogicalDevices(FluxNetwork.POINT).sumOf { it.transferChange }
+        val changes = network.runtimeDevices(FluxNetwork.POINT).sumOf { it.transferChange }
         check(changes == -150L)
         cleanup(network, first, second)
         helper.succeed()
@@ -153,11 +155,11 @@ class BatteryGameTests {
         val alien = config(helper, network).copy(ownerUuid = UUID.randomUUID())
         val slot = insert(tile, alien)
         network.onEndServerTick()
-        check(network.getLogicalDevices(FluxNetwork.POINT).isEmpty())
+        check(network.runtimeDevices(FluxNetwork.POINT).isEmpty())
         BatteryStateService.setConfig(slot.stack, config(helper, network))
         FluxBatteryHostManager.tick(tile)
         network.onEndServerTick()
-        check(network.getLogicalDevices(FluxNetwork.POINT).size == 1)
+        check(network.runtimeDevices(FluxNetwork.POINT).size == 1)
         FluxNetworkData.getInstance().deleteNetwork(network)
         check(tile.getData(FluxBatteryMod.HOST_ATTACHMENT.get()).point == null)
         check(BatteryStateService.energy(slot.stack).storedEnergy == 0L)
@@ -206,18 +208,18 @@ class BatteryGameTests {
         check(target.insertItem(moved, Action.EXECUTE, AutomationType.MANUAL).isEmpty)
         FluxBatteryHostManager.tick(second)
         firstNetwork.onEndServerTick()
-        check(firstNetwork.getLogicalDevices(FluxNetwork.POINT).size == 1)
+        check(firstNetwork.runtimeDevices(FluxNetwork.POINT).size == 1)
         check(firstNetwork.getConnectionByPos(GlobalPos.of(helper.level.dimension(), first.blockPos)) == null)
         check(target.stack.get(BatteryComponents.IDENTITY.get()) == identity)
         check(BatteryStateService.energy(target.stack).storedEnergy == 345L)
         BatteryStateService.setConfig(target.stack, config(helper, secondNetwork))
         FluxBatteryHostManager.tick(second)
         firstNetwork.onEndServerTick(); secondNetwork.onEndServerTick()
-        check(firstNetwork.getLogicalDevices(FluxNetwork.POINT).isEmpty())
-        check(secondNetwork.getLogicalDevices(FluxNetwork.POINT).size == 1)
+        check(firstNetwork.runtimeDevices(FluxNetwork.POINT).isEmpty())
+        check(secondNetwork.runtimeDevices(FluxNetwork.POINT).size == 1)
         helper.setBlock(BlockPos(6, 1, 2), net.minecraft.world.level.block.Blocks.AIR)
         secondNetwork.onEndServerTick()
-        check(secondNetwork.getLogicalDevices(FluxNetwork.POINT).isEmpty())
+        check(secondNetwork.runtimeDevices(FluxNetwork.POINT).isEmpty())
         cleanup(firstNetwork, first)
         cleanup(secondNetwork, second)
         helper.succeed()
@@ -279,7 +281,7 @@ class BatteryGameTests {
         check(network.statistics.fluxStorageCount == 1 && network.statistics.fluxControllerCount == 1)
         listOf(point, storage, controller, plug).forEach { it.disconnect() }
         network.onEndServerTick()
-        check(network.getLogicalDevices(FluxNetwork.ANY).isEmpty())
+        check(network.runtimeDevices(FluxNetwork.ANY).isEmpty())
         FluxNetworkData.getInstance().deleteNetwork(network)
         helper.succeed()
     }

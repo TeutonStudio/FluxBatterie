@@ -1,5 +1,7 @@
 package de.voxelteuton.fluxbattery
 
+import de.voxelteuton.fluxbattery.bridge.*
+
 import mekanism.common.inventory.slot.BasicInventorySlot
 import mekanism.common.inventory.slot.EnergyInventorySlot
 import mekanism.common.tile.base.TileEntityMekanism
@@ -38,7 +40,7 @@ object FluxBatteryHostManager {
         remove(tile)
         val binding = BatteryHostLifecycle(HostKey(level.server, level.dimension(), tile.blockPos.immutable(), index), id, config)
         val point = HostedFluxPoint(tile, slot, binding, network)
-        if (network.enqueueConnectionAddition(point)) {
+        if (network.registerRuntime(point)) {
             hosts[tile] = point
             slots[slot] = point
             tile.getData(FluxBatteryMod.HOST_ATTACHMENT.get()).point = point

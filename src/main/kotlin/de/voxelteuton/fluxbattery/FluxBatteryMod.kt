@@ -23,9 +23,7 @@ import sonar.fluxnetworks.api.FluxCapabilities
 @Mod(FluxBatteryMod.ID)
 class FluxBatteryMod(bus: IEventBus, container: ModContainer) {
     init {
-        check((sonar.fluxnetworks.common.connection.FluxNetwork.INVALID as Any as de.voxelteuton.fluxbattery.bridge.LoadTimePatched).fluxBatteryPatchVersion() == 1)
-        org.slf4j.LoggerFactory.getLogger("FluxBattery").info("Flux Battery prototype: Kotlin ABI available during mod construction after early transformation")
-        check(sonar.fluxnetworks.common.connection.FluxNetwork.INVALID.javaClass.getMethod("fluxBatteryMixinProbe").invoke(sonar.fluxnetworks.common.connection.FluxNetwork.INVALID) == 42)
+        de.voxelteuton.fluxbattery.bridge.RuntimePatchGuard.verify()
         ITEMS.register(bus)
         bus.addListener<net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent>(BatteryNetworking::register)
         ATTACHMENTS.register(bus)
