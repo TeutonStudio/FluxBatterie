@@ -1,0 +1,451 @@
+--- a/src/main/java/sonar/fluxnetworks/api/device/IFluxRuntimeDevice.java
++++ b/src/main/java/sonar/fluxnetworks/api/device/IFluxRuntimeDevice.java
+@@ -0,0 +1,11 @@
++package sonar.fluxnetworks.api.device;
++
++import sonar.fluxnetworks.common.connection.TransferHandler;
++
++/** Active network participant; does not require a world block entity. */
++public interface IFluxRuntimeDevice extends IFluxDevice {
++    TransferHandler getTransferHandler();
++    void markEnergyChanged();
++    void disconnect();
++    default void sendBlockUpdate() {}
++}
+--- a/src/main/java/sonar/fluxnetworks/common/connection/ClientFluxNetwork.java
++++ b/src/main/java/sonar/fluxnetworks/common/connection/ClientFluxNetwork.java
+@@ -5,7 +5,7 @@
+ import net.neoforged.api.distmarker.OnlyIn;
+ import sonar.fluxnetworks.api.network.AccessLevel;
+ import sonar.fluxnetworks.client.ClientCache;
+-import sonar.fluxnetworks.common.device.TileFluxDevice;
++import sonar.fluxnetworks.api.device.IFluxRuntimeDevice;
+ 
+ import javax.annotation.Nonnull;
+ import java.util.List;
+@@ -23,7 +23,7 @@
+ 
+     @Nonnull
+     @Override
+-    public List<TileFluxDevice> getLogicalDevices(int logic) {
++    public List<IFluxRuntimeDevice> getLogicalDevices(int logic) {
+         throw new IllegalStateException();
+     }
+ 
+@@ -33,12 +33,12 @@
+     }
+ 
+     @Override
+-    public boolean enqueueConnectionAddition(@Nonnull TileFluxDevice device) {
++    public boolean enqueueConnectionAddition(@Nonnull IFluxRuntimeDevice device) {
+         throw new IllegalStateException();
+     }
+ 
+     @Override
+-    public void enqueueConnectionRemoval(@Nonnull TileFluxDevice device, boolean unload) {
++    public void enqueueConnectionRemoval(@Nonnull IFluxRuntimeDevice device, boolean unload) {
+         throw new IllegalStateException();
+     }
+ 
+--- a/src/main/java/sonar/fluxnetworks/common/connection/FluxNetwork.java
++++ b/src/main/java/sonar/fluxnetworks/common/connection/FluxNetwork.java
+@@ -10,7 +10,7 @@
+ import sonar.fluxnetworks.api.device.IFluxDevice;
+ import sonar.fluxnetworks.api.network.*;
+ import sonar.fluxnetworks.common.data.FluxPlayerData;
+-import sonar.fluxnetworks.common.device.TileFluxDevice;
++import sonar.fluxnetworks.api.device.IFluxRuntimeDevice;
+ import sonar.fluxnetworks.common.util.FluxUtils;
+ 
+ import javax.annotation.*;
+@@ -82,7 +82,7 @@
+     final NetworkStatistics mStatistics = new NetworkStatistics(this);
+     final HashMap<UUID, NetworkMember> mMemberMap = new HashMap<>();
+     /**
+-     * Server: {@link TileFluxDevice} (loaded) and {@link PhantomFluxDevice} (unloaded)
++     * Server: {@link IFluxRuntimeDevice} (loaded) and {@link PhantomFluxDevice} (unloaded)
+      * <p>
+      * Client: {@link PhantomFluxDevice} (data container)
+      */
+@@ -284,7 +284,7 @@
+      * @return a list of devices
+      */
+     @Nonnull
+-    public List<TileFluxDevice> getLogicalDevices(int logic) {
++    public List<IFluxRuntimeDevice> getLogicalDevices(int logic) {
+         return Collections.emptyList();
+     }
+ 
+@@ -298,22 +298,30 @@
+     }
+ 
+     /**
+-     * Add a logical device to this network. Called by {@link TileFluxDevice}.
++     * Add a logical device to this network. Called by {@link IFluxRuntimeDevice}.
+      *
+      * @param device the logical device
+      * @return success or not
+      */
+-    public boolean enqueueConnectionAddition(@Nonnull TileFluxDevice device) {
++    public boolean enqueueConnectionAddition(sonar.fluxnetworks.common.device.TileFluxDevice device) {
++        return enqueueConnectionAddition((IFluxRuntimeDevice) device);
++    }
++
++    public boolean enqueueConnectionAddition(@Nonnull IFluxRuntimeDevice device) {
+         return true;
+     }
+ 
+     /**
+-     * Remove a logical device from this network. Called by {@link TileFluxDevice}.
++     * Remove a logical device from this network. Called by {@link IFluxRuntimeDevice}.
+      *
+      * @param device the logical device
+      * @param unload true if just chunk unload, false if it no longer belongs to this network
+      */
+-    public void enqueueConnectionRemoval(@Nonnull TileFluxDevice device, boolean unload) {
++    public void enqueueConnectionRemoval(sonar.fluxnetworks.common.device.TileFluxDevice device, boolean unload) {
++        enqueueConnectionRemoval((IFluxRuntimeDevice) device, unload);
++    }
++
++    public void enqueueConnectionRemoval(@Nonnull IFluxRuntimeDevice device, boolean unload) {
+     }
+ 
+     /*@Override
+--- a/src/main/java/sonar/fluxnetworks/common/connection/NetworkStatistics.java
++++ b/src/main/java/sonar/fluxnetworks/common/connection/NetworkStatistics.java
+@@ -3,7 +3,7 @@
+ import it.unimi.dsi.fastutil.longs.LongArrayList;
+ import it.unimi.dsi.fastutil.longs.LongList;
+ import net.minecraft.nbt.CompoundTag;
+-import sonar.fluxnetworks.common.device.TileFluxDevice;
++import sonar.fluxnetworks.api.device.IFluxRuntimeDevice;
+ 
+ import java.util.List;
+ 
+@@ -65,16 +65,16 @@
+      * Called every 5 ticks
+      */
+     private void weakTick() {
+-        List<TileFluxDevice> plugs = network.getLogicalDevices(FluxNetwork.PLUG);
++        List<IFluxRuntimeDevice> plugs = network.getLogicalDevices(FluxNetwork.PLUG);
+         plugs.forEach(p -> {
+             if (!p.getDeviceType().isStorage()) {
+-                energyInput4 += p.getTransferChange();
++                energyInput4 = addNonNegative(energyInput4, p.getTransferChange());
+             }
+         });
+-        List<TileFluxDevice> points = network.getLogicalDevices(FluxNetwork.POINT);
++        List<IFluxRuntimeDevice> points = network.getLogicalDevices(FluxNetwork.POINT);
+         points.forEach(p -> {
+             if (!p.getDeviceType().isStorage()) {
+-                energyOutput4 -= p.getTransferChange();
++                energyOutput4 = addNonNegative(energyOutput4, -p.getTransferChange());
+             }
+         });
+     }
+@@ -85,14 +85,14 @@
+     private void weakerTick() {
+         totalBuffer = 0;
+         totalEnergy = 0;
+-        List<TileFluxDevice> devices = network.getLogicalDevices(FluxNetwork.ANY);
++        List<IFluxRuntimeDevice> devices = network.getLogicalDevices(FluxNetwork.ANY);
+         devices.forEach(p -> {
+             if (!p.getDeviceType().isStorage()) {
+-                totalBuffer += p.getTransferBuffer();
++                totalBuffer = addNonNegative(totalBuffer, p.getTransferBuffer());
+             }
+         });
+-        List<TileFluxDevice> storages = network.getLogicalDevices(FluxNetwork.STORAGE);
+-        storages.forEach(p -> totalEnergy += p.getTransferBuffer());
++        List<IFluxRuntimeDevice> storages = network.getLogicalDevices(FluxNetwork.STORAGE);
++        storages.forEach(p -> totalEnergy = addNonNegative(totalEnergy, p.getTransferBuffer()));
+         fluxControllerCount = network.getLogicalDevices(FluxNetwork.CONTROLLER).size();
+         fluxStorageCount = storages.size();
+         fluxPlugCount = network.getLogicalDevices(FluxNetwork.PLUG).size() - fluxStorageCount;
+@@ -101,7 +101,7 @@
+         energyOutput = energyOutput4 / 4;
+         energyInput4 = 0;
+         energyOutput4 = 0;
+-        energyChange5 += Math.max(energyInput, energyOutput);
++        energyChange5 = addNonNegative(energyChange5, Math.max(energyInput, energyOutput));
+ 
+         averageTickMicro = (int) Math.min(runningTotalNano / 20000, Integer.MAX_VALUE);
+         runningTotalNano = 0;
+@@ -116,6 +116,11 @@
+         }
+         energyChange.set(CHANGE_COUNT - 1, energyChange5 / 5);
+         energyChange5 = 0;
++    }
++
++    private static long addNonNegative(long total, long amount) {
++        if (amount <= 0) return total;
++        return amount > Long.MAX_VALUE - total ? Long.MAX_VALUE : total + amount;
+     }
+ 
+     public int getConnectionCount() {
+--- a/src/main/java/sonar/fluxnetworks/common/connection/PhantomFluxDevice.java
++++ b/src/main/java/sonar/fluxnetworks/common/connection/PhantomFluxDevice.java
+@@ -12,7 +12,7 @@
+ import sonar.fluxnetworks.api.device.FluxDeviceType;
+ import sonar.fluxnetworks.api.device.IFluxDevice;
+ import sonar.fluxnetworks.common.data.FluxDeviceConfigComponent;
+-import sonar.fluxnetworks.common.device.TileFluxDevice;
++import sonar.fluxnetworks.api.device.IFluxRuntimeDevice;
+ import sonar.fluxnetworks.common.util.FluxUtils;
+ 
+ import javax.annotation.Nonnull;
+@@ -25,7 +25,7 @@
+  * They just are loaded on the server world, or used to record unloaded flux devices on server.
+  * Logical operations are not allowed here.
+  *
+- * @see TileFluxDevice
++ * @see IFluxRuntimeDevice
+  */
+ public class PhantomFluxDevice implements IFluxDevice {
+ 
+@@ -48,12 +48,17 @@
+     }
+ 
+     /**
+-     * Copy data from TileFluxDevice on server.
++     * Copy data from IFluxRuntimeDevice on server.
+      *
+      * @param device the loaded device entity
+      */
+     @Nonnull
+-    public static PhantomFluxDevice makeUnloaded(@Nonnull TileFluxDevice device) {
++    public static PhantomFluxDevice makeUnloaded(@Nonnull sonar.fluxnetworks.common.device.TileFluxDevice device) {
++        return makeUnloaded((IFluxRuntimeDevice) device);
++    }
++
++    @Nonnull
++    public static PhantomFluxDevice makeUnloaded(@Nonnull IFluxRuntimeDevice device) {
+         PhantomFluxDevice t = new PhantomFluxDevice();
+         t.mNetworkID = device.getNetworkID();
+         t.mCustomName = device.getCustomName();
+--- a/src/main/java/sonar/fluxnetworks/common/connection/ServerFluxNetwork.java
++++ b/src/main/java/sonar/fluxnetworks/common/connection/ServerFluxNetwork.java
+@@ -8,7 +8,7 @@
+ import sonar.fluxnetworks.api.device.*;
+ import sonar.fluxnetworks.api.network.*;
+ import sonar.fluxnetworks.common.data.FluxPlayerData;
+-import sonar.fluxnetworks.common.device.TileFluxDevice;
++import sonar.fluxnetworks.api.device.IFluxRuntimeDevice;
+ 
+ import javax.annotation.Nonnull;
+ import java.lang.reflect.Array;
+@@ -19,7 +19,7 @@
+  */
+ public class ServerFluxNetwork extends FluxNetwork {
+ 
+-    private static final Comparator<TileFluxDevice> sDescendingOrder =
++    private static final Comparator<IFluxRuntimeDevice> sDescendingOrder =
+             (lhs, rhs) -> Integer.compare(rhs.getTransferHandler().getPriority(),
+                     lhs.getTransferHandler().getPriority());
+ 
+@@ -29,13 +29,14 @@
+     private static final Class<?>[] sLogicalTypes =
+             {IFluxDevice.class, IFluxPlug.class, IFluxPoint.class, IFluxStorage.class, IFluxController.class};
+ 
+-    private final ArrayList<TileFluxDevice>[] mDevices;
++    private final ArrayList<IFluxRuntimeDevice>[] mDevices;
+ 
+     // LinkedList doesn't create large arrays, should be better
+-    private final LinkedList<TileFluxDevice> mToAdd = new LinkedList<>();
+-    private final LinkedList<TileFluxDevice> mToRemove = new LinkedList<>();
++    private final LinkedList<IFluxRuntimeDevice> mToAdd = new LinkedList<>();
++    private final LinkedList<IFluxRuntimeDevice> mToRemove = new LinkedList<>();
+ 
+     private boolean mSortConnections = true;
++    private boolean mDeleted;
+ 
+     private final TransferIterator mPlugTransferIterator = new TransferIterator(false);
+     private final TransferIterator mPointTransferIterator = new TransferIterator(true);
+@@ -45,8 +46,8 @@
+     private String mPassword;
+ 
+     {
+-        @SuppressWarnings("unchecked") final ArrayList<TileFluxDevice>[] devices =
+-                (ArrayList<TileFluxDevice>[]) Array.newInstance(ArrayList.class, sLogicalTypes.length);
++        @SuppressWarnings("unchecked") final ArrayList<IFluxRuntimeDevice>[] devices =
++                (ArrayList<IFluxRuntimeDevice>[]) Array.newInstance(ArrayList.class, sLogicalTypes.length);
+         Arrays.setAll(devices, type -> new ArrayList<>());
+         mDevices = devices;
+     }
+@@ -88,7 +89,7 @@
+     }*/
+ 
+     private void handleConnectionQueue() {
+-        TileFluxDevice device;
++        IFluxRuntimeDevice device;
+         while ((device = mToAdd.poll()) != null) {
+             for (int type = 0; type < sLogicalTypes.length; type++) {
+                 if (sLogicalTypes[type].isInstance(device)) {
+@@ -116,7 +117,7 @@
+ 
+     @Nonnull
+     @Override
+-    public ArrayList<TileFluxDevice> getLogicalDevices(int logic) {
++    public ArrayList<IFluxRuntimeDevice> getLogicalDevices(int logic) {
+         return mDevices[logic];
+     }
+ 
+@@ -128,13 +129,13 @@
+ 
+         mBufferLimiter = 0;
+ 
+-        List<TileFluxDevice> devices = getLogicalDevices(ANY);
++        List<IFluxRuntimeDevice> devices = getLogicalDevices(ANY);
+         for (var d : devices) {
+             d.getTransferHandler().onCycleStart();
+         }
+ 
+-        List<TileFluxDevice> plugs = getLogicalDevices(PLUG);
+-        List<TileFluxDevice> points = getLogicalDevices(POINT);
++        List<IFluxRuntimeDevice> plugs = getLogicalDevices(PLUG);
++        List<IFluxRuntimeDevice> points = getLogicalDevices(POINT);
+         if (!points.isEmpty() && !plugs.isEmpty()) {
+             // push into stack because they called too many times below
+             final TransferIterator plugIterator = mPlugTransferIterator.reset(plugs);
+@@ -142,8 +143,8 @@
+             CYCLE:
+             while (pointIterator.hasNext()) {
+                 while (plugIterator.hasNext()) {
+-                    TileFluxDevice plug = plugIterator.next();
+-                    TileFluxDevice point = pointIterator.next();
++                    IFluxRuntimeDevice plug = plugIterator.next();
++                    IFluxRuntimeDevice point = pointIterator.next();
+                     if (plug.getDeviceType() == point.getDeviceType()) {
+                         break CYCLE; // Storage always have the lowest priority, the cycle can be broken here.
+                     }
+@@ -166,7 +167,8 @@
+         for (var d : devices) {
+             TransferHandler h = d.getTransferHandler();
+             h.onCycleEnd();
+-            limiter += h.getRequest();
++            long request = h.getRequest();
++            limiter = request > Long.MAX_VALUE - limiter ? Long.MAX_VALUE : limiter + request;
+             if (h.getChange() != 0) {
+                 d.markEnergyChanged();
+             }
+@@ -202,20 +204,28 @@
+     @Override
+     public void onDelete() {
+         super.onDelete();
+-        getLogicalDevices(ANY).forEach(TileFluxDevice::disconnect);
+-        Arrays.fill(mDevices, null);
++        // Include pending additions: deletion can precede the first network cycle.
++        var disconnected = new LinkedHashSet<IFluxRuntimeDevice>(getLogicalDevices(ANY));
++        disconnected.addAll(mToAdd);
++        disconnected.forEach(IFluxRuntimeDevice::disconnect);
++        mDeleted = true;
++        for (var list : mDevices) list.clear();
+         mToAdd.clear();
+         mToRemove.clear();
+     }
+ 
+     @Override
+     public boolean isValid() {
+-        return true;
+-    }
+-
+-    @Override
+-    public boolean enqueueConnectionAddition(@Nonnull TileFluxDevice device) {
++        return !mDeleted;
++    }
++
++    @Override
++    public boolean enqueueConnectionAddition(@Nonnull IFluxRuntimeDevice device) {
++        if (mDeleted) return false;
+         if (device.getDeviceType().isController() && !getLogicalDevices(CONTROLLER).isEmpty()) {
++            return false;
++        }
++        if (mConnectionMap.get(device.getGlobalPos()) instanceof IFluxRuntimeDevice existing && existing != device) {
+             return false;
+         }
+         if (!mToAdd.contains(device) && !getLogicalDevices(ANY).contains(device)) {
+@@ -228,7 +238,12 @@
+     }
+ 
+     @Override
+-    public void enqueueConnectionRemoval(@Nonnull TileFluxDevice device, boolean unload) {
++    public void enqueueConnectionRemoval(@Nonnull IFluxRuntimeDevice device, boolean unload) {
++        boolean pending = mToAdd.remove(device);
++        if (pending && !getLogicalDevices(ANY).contains(device)) {
++            mConnectionMap.remove(device.getGlobalPos(), device);
++            return;
++        }
+         if (!mToRemove.contains(device) && getLogicalDevices(ANY).contains(device)) {
+             mToRemove.offer(device);
+             mToAdd.remove(device);
+@@ -238,7 +253,7 @@
+                 mConnectionMap.put(device.getGlobalPos(), PhantomFluxDevice.makeUnloaded(device));
+             } else {
+                 // remove the tile entity
+-                mConnectionMap.remove(device.getGlobalPos());
++                mConnectionMap.remove(device.getGlobalPos(), device);
+             }
+         }
+     }
+--- a/src/main/java/sonar/fluxnetworks/common/connection/TransferIterator.java
++++ b/src/main/java/sonar/fluxnetworks/common/connection/TransferIterator.java
+@@ -1,23 +1,23 @@
+ package sonar.fluxnetworks.common.connection;
+ 
+-import sonar.fluxnetworks.common.device.TileFluxDevice;
++import sonar.fluxnetworks.api.device.IFluxRuntimeDevice;
+ 
+ import javax.annotation.Nonnull;
+ import java.util.Iterator;
+ import java.util.List;
+ 
+-public class TransferIterator implements Iterator<TileFluxDevice> {
++public class TransferIterator implements Iterator<IFluxRuntimeDevice> {
+ 
+     private final boolean mPoint;
+ 
+-    private Iterator<TileFluxDevice> mIterator;
+-    private TileFluxDevice mNext;
++    private Iterator<IFluxRuntimeDevice> mIterator;
++    private IFluxRuntimeDevice mNext;
+ 
+     public TransferIterator(boolean point) {
+         mPoint = point;
+     }
+ 
+-    public TransferIterator reset(@Nonnull List<TileFluxDevice> list) {
++    public TransferIterator reset(@Nonnull List<IFluxRuntimeDevice> list) {
+         mIterator = list.iterator();
+         if (mIterator.hasNext()) {
+             mNext = mIterator.next();
+@@ -56,7 +56,7 @@
+     }
+ 
+     @Override
+-    public TileFluxDevice next() {
++    public IFluxRuntimeDevice next() {
+         return mNext;
+     }
+ }
+--- a/src/main/java/sonar/fluxnetworks/common/device/TileFluxDevice.java
++++ b/src/main/java/sonar/fluxnetworks/common/device/TileFluxDevice.java
+@@ -39,7 +39,7 @@
+  */
+ @SuppressWarnings("ConstantConditions")
+ @ParametersAreNonnullByDefault
+-public abstract class TileFluxDevice extends BlockEntity implements IFluxDevice {
++public abstract class TileFluxDevice extends BlockEntity implements sonar.fluxnetworks.api.device.IFluxRuntimeDevice {
+ 
+     private static final BlockEntityTicker<? extends TileFluxDevice> sTickerServer =
+             (level, pos, state, tile) -> tile.onServerTick();
+--- a/src/main/java/sonar/fluxnetworks/register/Messages.java
++++ b/src/main/java/sonar/fluxnetworks/register/Messages.java
+@@ -468,7 +468,7 @@
+                 boolean changed = network.setNetworkName(name);
+                 if (network.setNetworkColor(color)) {
+                     // update renderer
+-                    network.getLogicalDevices(FluxNetwork.ANY).forEach(TileFluxDevice::sendBlockUpdate);
++                    network.getLogicalDevices(FluxNetwork.ANY).forEach(sonar.fluxnetworks.api.device.IFluxRuntimeDevice::sendBlockUpdate);
+                     changed = true;
+                 }
+                 changed |= network.setSecurityLevel(security);
