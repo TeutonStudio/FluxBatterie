@@ -246,8 +246,8 @@ class BatteryGameTests {
     fun operatingDigitalMiner(helper: GameTestHelper) {
         val network = network(helper)
         val tile = machine(helper, "digital_miner") as mekanism.common.tile.machine.TileEntityDigitalMiner
-        val slot = insert(tile, config(helper, network, 100_000))
-        val plug = supply(helper, network, 1_000_000)
+        val slot = insert(tile, config(helper, network, BatteryConfig().transferLimit))
+        val plug = supply(helper, network, 1_000_000_000)
         val ore = BlockPos(4, 1, 2)
         helper.setBlock(ore, net.minecraft.world.level.block.Blocks.IRON_ORE)
         val filter = mekanism.common.content.miner.MinerItemStackFilter()
@@ -261,8 +261,33 @@ class BatteryGameTests {
         helper.succeedWhen {
             helper.assertBlockNotPresent(net.minecraft.world.level.block.Blocks.IRON_ORE, ore)
             helper.assertTrue(tile.getInventorySlots(null).any { it.stack.`is`(net.minecraft.world.item.Items.RAW_IRON) }, "Miner must produce raw iron")
-            helper.assertTrue(plug.transferHandler.buffer < 1_000_000, "Miner must consume energy from the Flux network")
+            helper.assertTrue(plug.transferHandler.buffer < 1_000_000_000, "Miner must consume energy from the Flux network")
             tile.stop()
+            // Stress the real item adapter at maximum upgrade, range, height and silk costs.
+            for (upgrade in tile.supportedUpgrade) tile.getComponent().addUpgrades(upgrade, upgrade.max)
+            tile.setRadiusFromPacket(mekanism.common.config.MekanismConfig.general.minerMaxRadius.get())
+            tile.setMinYFromPacket(helper.level.minBuildHeight)
+            tile.setMaxYFromPacket(helper.level.maxBuildHeight - 1)
+            tile.toggleSilkTouch()
+            val container = tile.energyContainer
+            val demand = container.energyPerTick
+            check(demand > 0 && demand <= container.maxEnergy)
+            BatteryStateService.extract(slot.stack, Long.MAX_VALUE, false)
+            container.setEnergy(0)
+            val before = plug.transferHandler.buffer
+            network.onEndServerTick()
+            check(before - plug.transferHandler.buffer == 100_000_000L) { "Default battery limit must allow 100 million FE per cycle" }
+            val totalBefore = plug.transferHandler.buffer + BatteryStateService.energy(slot.stack).storedEnergy
+            repeat(64) {
+                network.onEndServerTick()
+                slot.fillContainerOrConvert()
+                check(container.extract(demand, Action.EXECUTE, AutomationType.INTERNAL) == demand) {
+                    "Fully upgraded miner ran short of energy on cycle $it"
+                }
+            }
+            val remainingFE = plug.transferHandler.buffer + BatteryStateService.energy(slot.stack).storedEnergy
+            val consumedJoules = mekanism.common.util.UnitDisplayUtils.EnergyUnit.FORGE_ENERGY.convertFrom(totalBefore - remainingFE)
+            check(consumedJoules == 64 * demand + container.energy) { "High-throughput transfer lost or created energy" }
             cleanup(network, tile)
         }
     }

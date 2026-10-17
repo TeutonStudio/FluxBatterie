@@ -20,7 +20,7 @@ data class BatteryConfig(
     val ownerUuid: UUID = UNOWNED,
     val customName: String = "",
     val priority: Int = 0,
-    val transferLimit: Long = 1_000_000,
+    val transferLimit: Long = 100_000_000,
     val disableTransferLimit: Boolean = false,
     val surgeMode: Boolean = false,
     val chunkLoadingEnabled: Boolean = false

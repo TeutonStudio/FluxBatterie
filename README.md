@@ -25,6 +25,8 @@ Freigegeben ist ausschließlich das unveränderte Flux Networks **8.0.0**, SHA-2
 5. Netzwerk benötigt eine Energiequelle an einem regulären Flux Plug. Versorgung und Priorisierung erfolgen durch Flux Networks.
 6. Entnehmen beendet Verbindung und Chunk-Ticket. Dieselbe Batterie kann anschließend in eine andere geeignete Maschine eingesetzt werden.
 
+Neue Batterien erlauben standardmäßig **100 Millionen FE pro Zyklus**. Bereits konfigurierte Batterien behalten ihr gespeichertes Limit: für mehr Durchfluss in der Batterie-Konfiguration das Limit erhöhen oder „Unlimited transfer“ aktivieren. Auch das Limit am versorgenden Flux Plug und die Energiequelle müssen den Verbrauch abdecken.
+
 Privat-/verschlüsselte Netzwerke erfordern dauerhafte Besitzer- oder Mitgliedsrechte. Passwörter werden nicht gespeichert. Nur der Batterie-Besitzer kann ihre Konfiguration bearbeiten. Netzwerkrechte werden während des Betriebs erneut geprüft.
 
 Getestet: Digital Miner (tatsächlicher Erzabbau), Enrichment Chamber, Energized Smelter. Der Mekanism-Adapter unterstützt weitere Mekanism-Maschinen mit `fill`-/`fillOrConvert`-Energieslots. Komplexe `IMultiblock`-Maschinen sind ausgeschlossen. Fremde FE-Maschinen werden nicht automatisch unterstützt; zusätzliche Mod-Adapter sind ein separates Erweiterungsziel. Bei mehreren Batterieslots arbeitet nur die Batterie im ersten passenden Slot als Point; weitere bleiben normale Energieitems.

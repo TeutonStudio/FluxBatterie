@@ -1,5 +1,11 @@
 # Build- und Testbericht — 16.10.2026
 
+## Nachprüfung Durchfluss — 18.10.2026
+
+Neue Batterien haben jetzt ein Standardlimit von 100.000.000 statt 1.000.000 FE pro Flux-Zyklus. Bestehende Item-Konfigurationen behalten ihr gespeichertes Limit; es kann in der Batterieoberfläche erhöht oder deaktiviert werden. Das versorgende Plug-Limit bleibt separat wirksam.
+
+`./gradlew build --offline --no-daemon --max-workers=2` und alle 14 GameTests mit `-PpackagedAddon` erfolgreich. Der erweiterte Digital-Miner-Test prüft nach tatsächlichem Erzabbau eine Zuteilung von 100 Millionen FE aus einer leeren Batterie. Anschließend werden alle unterstützten Upgrades installiert, maximaler Radius, volle Welthöhe und Silk Touch aktiviert und 64 Versorgungszyklen über den echten Item-Energieadapter geprüft. Jeder Zyklus deckt den von Mekanism berechneten Verbrauch; die Energiebilanz bleibt erhalten. Diese Phase simuliert den Energieverbrauch durch Entnahme aus dem Maschinenpuffer, ohne einen vollständigen Abbau des großen Suchbereichs abzuwarten. Protokoll: `build/throughput-gametest.log`. Die Ursache einer Unterversorgung im konkreten Spielstand ist damit nicht nachgewiesen.
+
 ## Nachprüfung Bedienung — 18.10.2026
 
 Der Paketnamespace wurde anschließend vollständig auf `de.teutonstudio.fluxbattery` umgestellt, einschließlich Quellpfaden, Gradle-Gruppe, Mixin-Konfigurationen, Coremod-ABI und Prüfwerkzeugen. Sauberer Build mit Testfixture, Distributionsprüfung, alle 14 GameTests und paketierter Client-Smoke-Test waren nach der Umstellung erfolgreich.
