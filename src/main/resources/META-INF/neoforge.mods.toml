@@ -3,7 +3,7 @@ loaderVersion="[5.9,6)"
 license="All Rights Reserved"
 [[mods]]
 modId="fluxbattery"
-version="0.1.0-dev"
+version="0.1.0"
 displayName="Flux Battery"
 description='''A portable virtual Flux Point for Mekanism energy slots.'''
 [[dependencies.fluxbattery]]

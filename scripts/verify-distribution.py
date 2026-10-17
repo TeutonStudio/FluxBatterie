@@ -7,7 +7,7 @@ import zipfile
 root = Path(__file__).resolve().parent.parent
 original = root / 'libs/FluxNetworks-1.21.1-8.0.0.jar'
 assert hashlib.sha256(original.read_bytes()).hexdigest() == '29e511b2d76f85bd247aa213a92bb059ecc037fcc3fed82baffcff97b638d3a6'
-addon = root / 'build/libs/fluxbattery-0.1.0-dev.jar'
+addon = root / 'build/libs/fluxbattery-0.1.0.jar'
 with zipfile.ZipFile(addon) as jar:
     entries = jar.namelist()
     assert len(entries) == len(set(entries)), 'duplicate ZIP entries'

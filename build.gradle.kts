@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "2.1.21"
     id("net.neoforged.moddev") version "2.0.141"
 }
-version = "0.1.0-dev"
+version = "0.1.0"
 group = "de.teutonstudio.fluxbattery"
 base.archivesName.set("fluxbattery")
 java.toolchain.languageVersion.set(JavaLanguageVersion.of(21))
