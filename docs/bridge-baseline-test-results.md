@@ -78,7 +78,7 @@ Diese manuellen Fälle wurden nicht als bestanden markiert. Insbesondere eine vo
 
 ## Entwicklungsdateien und Installation
 
-Neue Modklassen: `src/main/kotlin/de/voxelteuton/fluxbattery/`, Client in `client/`, gezielte Mekanism-Hooks in `mixin/`, Integrationstests in `gametest/`. Bridge: acht ersetzte Java-Klassen plus `IFluxRuntimeDevice`, vollständiger Quellpatch unter `bridge/patches/`. Build: `build.gradle.kts`, `settings.gradle.kts`, Metadaten, Itemmodell/Textur, Übersetzungen und Rezept. Testwerkzeuge unter `scripts/`, JUnit unter `src/test/kotlin/`.
+Neue Modklassen: `src/main/kotlin/de/teutonstudio/fluxbattery/`, Client in `client/`, gezielte Mekanism-Hooks in `mixin/`, Integrationstests in `gametest/`. Bridge: acht ersetzte Java-Klassen plus `IFluxRuntimeDevice`, vollständiger Quellpatch unter `bridge/patches/`. Build: `build.gradle.kts`, `settings.gradle.kts`, Metadaten, Itemmodell/Textur, Übersetzungen und Rezept. Testwerkzeuge unter `scripts/`, JUnit unter `src/test/kotlin/`.
 
 Installation und Bedienung stehen in `README.md`. Benötigte Ausgabe: `build/libs/fluxbattery-0.1.0-dev.jar` **und** `build/bridge/FluxNetworks-1.21.1-8.0.0-fluxbattery.1.jar`, jeweils auf Client und Server neben Mekanism und KFF. Original-Flux-JAR entfernen.
 

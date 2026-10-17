@@ -1,1 +1,5 @@
-{"item.fluxbattery.flux_battery":"Flux Battery"}
+{
+  "item.fluxbattery.flux_battery": "Flux Battery",
+  "tooltip.fluxbattery.configure": "Right-click: configure network (on blocks: Shift-right-click)",
+  "tooltip.fluxbattery.unconfigured": "Select and save a network before inserting into an energy slot."
+}

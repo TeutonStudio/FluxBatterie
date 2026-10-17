@@ -1,1 +1,5 @@
-{"item.fluxbattery.flux_battery":"Flux-Batterie"}
+{
+  "item.fluxbattery.flux_battery": "Flux-Batterie",
+  "tooltip.fluxbattery.configure": "Rechtsklick: Netzwerk einstellen (an Blöcken: Shift-Rechtsklick)",
+  "tooltip.fluxbattery.unconfigured": "Vor dem Einsetzen in den Energieslot ein Netzwerk wählen und speichern."
+}

@@ -6,7 +6,7 @@ plugins {
     id("net.neoforged.moddev") version "2.0.141"
 }
 version = "0.1.0-dev"
-group = "de.voxelteuton.fluxbattery"
+group = "de.teutonstudio.fluxbattery"
 base.archivesName.set("fluxbattery")
 java.toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 kotlin.jvmToolchain(21)
@@ -23,7 +23,12 @@ val packagedRun = if (project.hasProperty("packagedAddon")) sourceSets.create("p
 neoForge {
     version = "21.1.231"
     runs {
-        configureEach { if (packagedRun != null) sourceSet.set(packagedRun) }
+        configureEach {
+            // IDEA's delegated Application runner can lose the JVM module path.
+            // Use the checked-in Gradle runs so ModDev owns the complete launch.
+            disableIdeRun()
+            if (packagedRun != null) sourceSet.set(packagedRun)
+        }
         create("client") { client(); gameDirectory = file("run-client"); if (project.hasProperty("clientSmoke")) systemProperty("fluxbattery.clientSmoke", "true") }
         create("server") {
             server(); programArgument("--nogui")
@@ -71,13 +76,13 @@ dependencies {
 tasks.register<JavaExec>("generateFluxShapes") {
     dependsOn(verifyFluxInput)
     classpath = loaderTools.runtimeClasspath
-    mainClass.set("de.voxelteuton.fluxbattery.tools.LoaderVerification")
+    mainClass.set("de.teutonstudio.fluxbattery.tools.LoaderVerification")
     args("generate")
 }
 val verifyLoader by tasks.registering(JavaExec::class) {
     dependsOn(verifyFluxInput)
     classpath = loaderTools.runtimeClasspath
-    mainClass.set("de.voxelteuton.fluxbattery.tools.LoaderVerification")
+    mainClass.set("de.teutonstudio.fluxbattery.tools.LoaderVerification")
 }
 
 // Separate external test mod: exercises an AFTER-phase Mixin against FluxNetwork.

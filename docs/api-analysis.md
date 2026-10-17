@@ -39,7 +39,7 @@ Releasequellen:
 
 ## Architekturentscheidung
 
-**Original-JAR mit Ladezeit-Erweiterung.** Das Original bietet keinen Nicht-Tile-Registrierungseinstieg; der isolierte Prototyp hat die erforderliche ABI-Erweiterung unter NeoForge 21.1.231 auf Client und Dedicated Server nachgewiesen. Ein Coremod erweitert gezielt die originalen Klassen, deren Laufzeit bleibt Flux Networks. `FluxRuntimeDevice` und `FluxRuntimeNetwork` liegen vollständig unter `de.voxelteuton.fluxbattery.bridge`.
+**Original-JAR mit Ladezeit-Erweiterung.** Das Original bietet keinen Nicht-Tile-Registrierungseinstieg; der isolierte Prototyp hat die erforderliche ABI-Erweiterung unter NeoForge 21.1.231 auf Client und Dedicated Server nachgewiesen. Ein Coremod erweitert gezielt die originalen Klassen, deren Laufzeit bleibt Flux Networks. `FluxRuntimeDevice` und `FluxRuntimeNetwork` liegen vollständig unter `de.teutonstudio.fluxbattery.bridge`.
 
 Aktive Listen, Warteschlangen, Iteratoren, Lambda-Handles und Statistikzugriffe werden von Tile auf Runtime-Teilnehmer verallgemeinert. Die alten Tile-Registrierungssignaturen und `PhantomFluxDevice.makeUnloaded(TileFluxDevice)` bleiben als Delegationsüberladungen erhalten. Die neue Iterator-Rückgabe dient internen Runtime-Pfaden; die alte Tile-Rückgabe bleibt für Tile-Teilnehmer vorhanden, kann für Hosted Points aber keinen Tile liefern. Addons dürfen aktive Teilnehmer deshalb nicht pauschal auf TileFluxDevice casten.
 

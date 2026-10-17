@@ -27,7 +27,7 @@ NeoForge liest `META-INF/coremods.json` und führt `coremods/fluxbattery.js` vor
 | `PhantomFluxDevice` | Runtime-Überladung für `makeUnloaded`; alte Tile-Signatur bleibt. |
 | `Messages` | Ausschließlich der Blockupdate-Methodenverweis beim Netzwerkfarbwechsel wird auf die Runtime-Schnittstelle umgestellt. |
 
-Die ABI liegt im Addon-Namespace `de.voxelteuton.fluxbattery.bridge`: `FluxRuntimeDevice`, `FluxRuntimeNetwork`, `ServerRuntimeAccess`. Normale Flux-Geräte und Hosted Points benutzen Flux' originale Queues und denselben Verteiler. `RuntimeHooks` besitzt weder eine eigene Netzwerkregistry noch einen Energieverteiler.
+Die ABI liegt im Addon-Namespace `de.teutonstudio.fluxbattery.bridge`: `FluxRuntimeDevice`, `FluxRuntimeNetwork`, `ServerRuntimeAccess`. Normale Flux-Geräte und Hosted Points benutzen Flux' originale Queues und denselben Verteiler. `RuntimeHooks` besitzt weder eine eigene Netzwerkregistry noch einen Energieverteiler.
 
 Ausstehende Anmeldung wird bei sofortiger Entnahme aus `mToAdd` entfernt. Positionskarten werden nur für die passende Instanz entfernt; eine andere Runtime-Instanz an derselben Position wird abgewiesen. Netzwerklöschung trennt aktive und ausstehende Teilnehmer, sperrt neue Anmeldungen, leert Listen und Queues und lässt keine null-Listen zurück. Das Löschflag wird vor den Disconnect-Callbacks gesetzt.
 

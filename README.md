@@ -19,7 +19,7 @@ Freigegeben ist ausschließlich das unveränderte Flux Networks **8.0.0**, SHA-2
 ## Bedienung
 
 1. Batterie herstellen: `IFI / ETE / IFI`; I = Eisenbarren, F = Flux Core, E = Redstone, T = Mekanism Energy Tablet. Alternativ Kreativtab „Tools & Utilities“.
-2. Batterie halten und **Shift-Rechtsklick** ausführen.
+2. Batterie halten und **Rechtsklick in die Luft** ausführen. Beim Anvisieren einer Maschine **Shift-Rechtsklick** verwenden, um deren Oberfläche zu umgehen. Der Item-Tooltip zeigt die Bedienung ebenfalls an.
 3. Ein zugängliches Netzwerk auswählen, Name, Priorität, FE-Limit pro Zyklus, unbegrenztes Limit, Surge und optional Chunkloading einstellen; speichern.
 4. Batterie in den Energie-Eingabeslot des Digital Miners einsetzen. Leere konfigurierte Batterien werden ebenfalls angenommen.
 5. Netzwerk benötigt eine Energiequelle an einem regulären Flux Plug. Versorgung und Priorisierung erfolgen durch Flux Networks.
@@ -57,6 +57,14 @@ python3 scripts/verify-distribution.py
 Java 21 über `JAVA_HOME` auswählen; Gradle kann die Toolchain alternativ herunterladen. Der unveränderte MDK-Wrapper ist Gradle **9.2.1**, ModDevGradle **2.0.141**, Kotlin **2.1.21**. Die Bootstrap-Datei lädt nur das festgelegte Original-Flux-JAR und prüft SHA-256; Gradle lädt Mekanism/KFF aus den festgelegten Maven-Repositories. `build` erzeugt ausschließlich das Addon in `build/libs/`; `patchedFlux` und der Bridge-SourceSet entfallen. Für einen Lauf mit dem gebauten Addon-JAR statt losen Entwicklungsklassen: `./gradlew runGameTestServer -PpackagedAddon`. Die Bytecode-Prüfstrukturen sind eingecheckt; `verifyLoader` prüft Originalklassen sowie absichtlich veränderte und fehlende Methoden und gehört zu `check`. `generateFluxShapes` ist ausschließlich ein Wartungswerkzeug nach bewusst geprüfter Änderung der Zielversion.
 
 Der Client-Smoke-Test zeigt eine synthetische Konfigurationsvorschau, speichert `docs/evidence/battery-screen.png` und beendet den Client.
+
+### Start in IntelliJ IDEA
+
+Die eingecheckte Gradle-Startkonfiguration **Flux Battery Client** auswählen oder im Gradle-Fenster `runClient` ausführen. Im Terminal funktioniert `./gradlew runClient` mit Java 21. Diese Aufgabe bereitet die Startdateien vor und übergibt den benötigten Java-Modulpfad sowie die Modulfreigaben an den Spielprozess.
+
+Für Server und GameTests stehen **Flux Battery Server** (`runServer`) und **Flux Battery GameTests** (`runGameTestServer`) bereit. Die automatisch erzeugten Application-Konfigurationen sind im Build deaktiviert, damit ein Gradle-Neuladen sie nicht erneut anlegt. In bestehenden IDEA-Projekten nach dem Neuladen alte Application-Konfigurationen **Client**, **Server** und **GameTestServer** einmal entfernen und **Flux Battery Client** auswählen. Die gemeinsame Gradle-Konfiguration funktioniert auch mit „Build and run using: Gradle“.
+
+Bei `Unknown module: cpw.mods.securejarhandler` und anschließendem `InaccessibleObjectException` für `MethodHandles.Lookup.IMPL_LOOKUP` prüfen, ob stattdessen `:net.neoforged.devlaunch.Main.main()` ausgeführt wird. Diesen generischen Main-Start durch **Flux Battery Client** ersetzen. Keine einzelnen `--add-opens`-Argumente ergänzen: Zum Start gehören auch der Modulpfad, die Spielargumente und die Mod-Verzeichnisse. Die Dateien unter `build/moddev/` werden von Gradle erzeugt und sollten nicht von Hand bearbeitet werden.
 
 ## Entwicklungsstand
 

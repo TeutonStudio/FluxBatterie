@@ -18,7 +18,7 @@ Beim regulären Serverstopp werden Runtime-Teilnehmer abgemeldet, gültige persi
 
 ## Netzwerk und Sicherheit
 
-`HostedFluxPoint` implementiert `de.voxelteuton.fluxbattery.bridge.FluxRuntimeDevice` und `IFluxPoint`. Keine neue Welt-BlockEntity, kein Maschinen-BlockState, keine Nachbarschaftssuche. Die bestehende Flux-Queue, Sortierung, Verteilung und Statistik bleiben zuständig.
+`HostedFluxPoint` implementiert `de.teutonstudio.fluxbattery.bridge.FluxRuntimeDevice` und `IFluxPoint`. Keine neue Welt-BlockEntity, kein Maschinen-BlockState, keine Nachbarschaftssuche. Die bestehende Flux-Queue, Sortierung, Verteilung und Statistik bleiben zuständig.
 
 `HostedPointTransferHandler` meldet freie Batteriekapazität unter Beachtung des verbleibenden Zykluslimits. Zuteilungen werden innerhalb derselben synchronen Serveroperation direkt in das Item geschrieben und als negativer Point-Verbrauch verbucht. Mekanism entlädt das Item anschließend regulär. Es gibt keinen zweiten Pfad in den Maschinenpuffer.
 

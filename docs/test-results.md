@@ -1,5 +1,19 @@
 # Build- und Testbericht — 16.10.2026
 
+## Nachprüfung Bedienung — 18.10.2026
+
+Der Paketnamespace wurde anschließend vollständig auf `de.teutonstudio.fluxbattery` umgestellt, einschließlich Quellpfaden, Gradle-Gruppe, Mixin-Konfigurationen, Coremod-ABI und Prüfwerkzeugen. Sauberer Build mit Testfixture, Distributionsprüfung, alle 14 GameTests und paketierter Client-Smoke-Test waren nach der Umstellung erfolgreich.
+
+Die Konfiguration öffnet jetzt auch per normalem Rechtsklick in die Luft. Beim Anvisieren eines Blocks lässt sich dessen Interaktion mit Shift-Rechtsklick umgehen; auch der Item-Blockinteraktionspfad öffnet die Konfiguration. Deutsche und englische Tooltips erklären die Bedienung und dass vor dem Einsetzen ein Netzwerk gespeichert werden muss. Ohne zugängliche Netzwerke zeigt die Oberfläche einen Hinweis zum Anlegen eines Flux-Netzwerks.
+
+`./gradlew build --offline --no-daemon --max-workers=2` erfolgreich. Alle 14 GameTests mit dem gebauten Addon-JAR erfolgreich. Der erweiterte Konfigurationstest startet mit einem neuen leeren Item, führt normalen Rechtsklick ohne Shift aus, prüft die initialisierte Identität, speichert das erste Netzwerk über den Update-Handler und setzt die weiterhin leere Batterie regulär in eine Enrichment Chamber ein. Anschließend werden 1000 FE vom Flux Plug empfangen und an die Maschine abgegeben. Der paketierte Client-Smoke-Test hat die Konfigurationsvorschau gerendert und sich erfolgreich beendet. Dieser Client-Test bleibt eine synthetische Vorschau; echte Client-Server-Bedienung und Shift-Rechtsklick auf einen Block wurden nicht automatisiert geprüft.
+
+## IntelliJ-Startkorrektur — 18.10.2026
+
+Der delegierte Application-Start `:net.neoforged.devlaunch.Main.main()` scheiterte mit unbekanntem `cpw.mods.securejarhandler` und fehlendem Zugriff auf `MethodHandles.Lookup.IMPL_LOOKUP`. Die automatisch generierten Application-Starts sind jetzt über `disableIdeRun()` deaktiviert. Eingecheckte Gradle-Konfigurationen starten Client, Server und GameTests über die vollständigen ModDev-Aufgaben. Im lokalen IDEA-Arbeitsbereich wurden die alten Application-Starts entfernt und **Flux Battery Client** ausgewählt.
+
+Mit Java 21 und dem vorhandenen Offline-Cache erfolgreich geprüft: `./gradlew build --offline --no-daemon --max-workers=2` einschließlich JUnit und Loader-Prüfung sowie `./gradlew runClient -PclientSmoke --offline --no-daemon --max-workers=2`. Der Client bestätigte alle Pflichtpatches, renderte die Konfigurationsvorschau und beendete sich mit `BUILD SUCCESSFUL`; weder `Unknown module` noch `InaccessibleObjectException` traten auf. Der Start über den IDEA-Run-Button wurde nicht automatisiert geprüft.
+
 ## Ergebnis und Vergleichsbasis
 
 Flux Battery läuft mit dem **unveränderten Flux Networks 8.0.0**. Es wird ausschließlich ein Flux-Battery-JAR gebaut. Die Ladezeit-Bridge erhält die virtuelle Point-Funktion und Flux' regulären Verteiler; die Mekanism-Anbindung bleibt erhalten.
