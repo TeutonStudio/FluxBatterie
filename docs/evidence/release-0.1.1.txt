@@ -1,0 +1,22 @@
+Flux Battery 0.1.1 — geprüft am 18.10.2026
+
+JAVA_HOME=/home/alex/.gradle/jdks/eclipse_adoptium-21-amd64-linux.2
+./gradlew build runGameTestServer runClient -PpackagedAddon -PclientSmoke --offline
+BUILD SUCCESSFUL
+Unit-Tests: 3, keine Fehler, keine übersprungenen Tests
+GameTests: All 15 required tests passed
+Client: Flux Battery client smoke screenshot captured
+Vorschau: docs/evidence/battery-screen.png (synthetischer deutscher Konfigurationsdialog)
+
+python3 scripts/verify-distribution.py
+Distribution verified: single addon, no sonar classes, pristine Flux 8.0.0 input
+Artefakt: build/libs/fluxbattery-0.1.1.jar
+SHA-256: 8af69b70d04a1fc58da28fec4094d4a07332d4a7622b280758c8b1a45f7a59dc
+
+Zusätzliche Prüfung des JAR-Inhalts:
+META-INF/neoforge.mods.toml: Mod-Version 0.1.1
+Rezept: [" F ", "FTF", " F "]
+F = fluxnetworks:flux_core, T = mekanism:energy_tablet
+Ergebnis: 1 x fluxbattery:flux_battery
+
+git diff --check: erfolgreich

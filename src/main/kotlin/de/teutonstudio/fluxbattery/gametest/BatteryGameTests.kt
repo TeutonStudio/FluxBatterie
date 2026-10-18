@@ -65,6 +65,23 @@ class BatteryGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 40)
+    fun creativeTabIntegration(helper: GameTestHelper) {
+        net.minecraft.world.item.CreativeModeTabs.tryRebuildTabContents(
+            helper.level.enabledFeatures(), true, helper.level.registryAccess())
+        val fluxTab = sonar.fluxnetworks.register.RegistryCreativeModeTabs.CREATIVE_MODE_TAB.get()
+        val toolsTab = BuiltInRegistries.CREATIVE_MODE_TAB.get(net.minecraft.world.item.CreativeModeTabs.TOOLS_AND_UTILITIES)
+        for (tab in listOf(fluxTab, checkNotNull(toolsTab))) {
+            check(tab.displayItems.count { it.`is`(FluxBatteryMod.BATTERY.get()) } == 1) {
+                "Battery must appear exactly once in ${tab.displayName.string}"
+            }
+            check(tab.searchTabDisplayItems.any { it.`is`(FluxBatteryMod.BATTERY.get()) }) {
+                "Battery missing from creative search"
+            }
+        }
+        helper.succeed()
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 40)
     fun sharedCapabilitiesAndPersistence(helper: GameTestHelper) {
         val originalCapacity = BatteryServerConfig.capacity.get()
         try {

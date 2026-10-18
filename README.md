@@ -9,7 +9,7 @@ Auf Client und Server installieren:
 - NeoForge **21.1.231**, Java **21**
 - Mekanism **1.21.1-10.7.19.85** (interne Mod-Version `10.7.19`)
 - Kotlin for Forge **5.9.0** (NeoForge-Version)
-- `fluxbattery-0.1.0.jar` aus `build/libs/`
+- `fluxbattery-0.1.1.jar` aus `build/libs/`
 - originales `FluxNetworks-1.21.1-8.0.0.jar` (CurseForge-Datei **6089446**)
 
 **Ausgeliefert wird nur das Flux-Battery-JAR.** Ein Ladezeit-Patch erweitert die originalen Flux-Klassen im Speicher. Ein altes Ersatz-/Bridge-JAR muss aus dem Mods-Ordner entfernt werden. Mod-ID und Flux-Speicherformate bleiben erhalten.
@@ -18,12 +18,14 @@ Freigegeben ist ausschließlich das unveränderte Flux Networks **8.0.0**, SHA-2
 
 ## Bedienung
 
-1. Batterie herstellen: `IFI / ETE / IFI`; I = Eisenbarren, F = Flux Core, E = Redstone, T = Mekanism Energy Tablet. Alternativ Kreativtab „Tools & Utilities“.
+1. Batterie herstellen: Energy Tablet von Mekanism in die Mitte, je einen Flux Core darüber, darunter, links und rechts (Plusform, Ecken leer). Alternativ im Kreativtab „Flux Networks“ oder „Tools & Utilities“.
 2. Batterie halten und **Rechtsklick in die Luft** ausführen. Beim Anvisieren einer Maschine **Shift-Rechtsklick** verwenden, um deren Oberfläche zu umgehen. Der Item-Tooltip zeigt die Bedienung ebenfalls an.
 3. Ein zugängliches Netzwerk auswählen, Name, Priorität, FE-Limit pro Zyklus, unbegrenztes Limit, Surge und optional Chunkloading einstellen; speichern.
 4. Batterie in den Energie-Eingabeslot des Digital Miners einsetzen. Leere konfigurierte Batterien werden ebenfalls angenommen.
 5. Netzwerk benötigt eine Energiequelle an einem regulären Flux Plug. Versorgung und Priorisierung erfolgen durch Flux Networks.
 6. Entnehmen beendet Verbindung und Chunk-Ticket. Dieselbe Batterie kann anschließend in eine andere geeignete Maschine eingesetzt werden.
+
+Die Konfiguration verwendet ein dunkles Flux-Terminal mit segmentierter Energieanzeige und einem dazu passenden Item-Icon. Netzwerke lassen sich vorwärts und rückwärts wechseln. Tooltips erläutern Surge, unbegrenzten Transfer und die Voraussetzungen für Chunkloading. Deutsch und Englisch werden unterstützt. Die Energieanzeige zeigt den Stand beim Öffnen.
 
 Neue Batterien erlauben standardmäßig **100 Millionen FE pro Zyklus**. Bereits konfigurierte Batterien behalten ihr gespeichertes Limit: für mehr Durchfluss in der Batterie-Konfiguration das Limit erhöhen oder „Unlimited transfer“ aktivieren. Auch das Limit am versorgenden Flux Plug und die Energiequelle müssen den Verbrauch abdecken.
 

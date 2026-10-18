@@ -107,6 +107,25 @@ Für den Linux-Client bleibt `earlyWindowControl=false` in `run-client/config/fm
 
 ## Installation und Grenzen
 
-Installiert werden **Flux Battery + originales Flux Networks 8.0.0 + Mekanism + Kotlin for Forge** auf NeoForge 21.1.231. Ein Ersatz-JAR wird nicht benötigt. Aktuelle Ausgabe: `build/libs/fluxbattery-0.1.0-dev.jar`. Hashes und entscheidende Logzeilen stehen in `evidence/verification.txt`.
+Installiert werden **Flux Battery + originales Flux Networks 8.0.0 + Mekanism + Kotlin for Forge** auf NeoForge 21.1.231. Ein Ersatz-JAR wird nicht benötigt. Aktuelle Ausgabe: `build/libs/fluxbattery-0.1.1.jar`. Hashes und entscheidende Logzeilen stehen in `evidence/verification.txt`.
 
 Ein aktiver Point pro Maschinenposition; erster passender Batterieslot gewinnt. Keine komplexen Mekanism-IMultiblocks und keine automatische Unterstützung fremder FE-Slots. Chunkloading ist standardmäßig aus und hält ausschließlich den Maschinenchunk. Long-Summenanzeigen sättigen. Creative-/Admin-Kopien kompletter Items liegen außerhalb der Energieerhaltung normaler Survival-Transfers.
+
+
+## UI und Kreativtab (18.10.2026)
+
+- Die Batterie erscheint zusätzlich im Kreativtab von Flux Networks (`fluxnetworks:tab`). Tools & Utilities bleibt verfügbar.
+- `creativeTabIntegration` baut die tatsächlichen Kreativtab-Inhalte mit der Server-Registry auf und prüft genau einen Batterieeintrag in beiden Tabs sowie die Aufnahme in ihre Suchinhalte.
+- `./gradlew build runGameTestServer -PpackagedAddon --offline`: erfolgreich; 3 Unit-Tests und alle 15 GameTests bestanden, einschließlich Kreativtab-Integration.
+- `./gradlew build runClient -PpackagedAddon -PclientSmoke --offline`: erfolgreich mit dem gebauten Addon-JAR. Deutsche Konfigurationsvorschau bei 854 × 480 Pixeln und GUI-Skalierung 2 visuell geprüft; Screenshot: `evidence/battery-screen.png`.
+- Dunkles Flux-Terminal mit türkisfarbenem Akzent, segmentierter Energieanzeige, Vor-/Zurück-Netzwerkauswahl, gruppierten Eingaben, Schaltern, Tooltips und Abbrechen/Speichern. Das Transferlimit bleibt bei aktiviertem Unlimited erhalten und ist dann nicht editierbar. Zahlenfelder filtern ungültige Zeichen und prüfen die serverseitig zulässigen Werte vor dem Senden.
+- Sämtliche neuen Oberflächentexte sind für Deutsch und Englisch lokalisiert. Der Status stellt klar, dass die gehaltene Batterie getrennt ist und erst eingesetzt als Point arbeitet. Energie ist eine Momentaufnahme beim Öffnen.
+- Neues transparentes Item-Icon, mit dem eingebauten Imagegen-Werkzeug erzeugt und per Nearest-Neighbor auf 32 × 32 exportiert. Prompt und Herkunft: `evidence/item-icon-prompt.txt`.
+- `python3 scripts/verify-distribution.py` und `git diff --check`: erfolgreich.
+
+Der Client-Smoke-Test prüft eine synthetische Vorschau, keinen vollständigen Konfigurationsdialog mit realem Spieler und Server. Eine manuelle Prüfung aller Schalter, Tastaturbedienung und Größen-/Sprachvarianten bleibt ergänzend sinnvoll.
+
+
+## Release 0.1.1 (18.10.2026)
+
+Das versionierte JAR wurde mit `build runGameTestServer runClient -PpackagedAddon -PclientSmoke --offline` geprüft: drei Unit-Tests, alle 15 GameTests und Client-Smoke-Test erfolgreich. Distributionsprüfung sowie Prüfung der Mod-Version und des Plus-Rezepts direkt im JAR erfolgreich. Nachweis und SHA-256: `evidence/release-0.1.1.txt`.

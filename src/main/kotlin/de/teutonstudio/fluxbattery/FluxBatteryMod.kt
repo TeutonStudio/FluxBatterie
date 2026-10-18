@@ -9,6 +9,7 @@ import net.neoforged.neoforge.event.server.ServerStoppingEvent
 import java.util.function.Supplier
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.CreativeModeTabs
+import sonar.fluxnetworks.register.RegistryCreativeModeTabs
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.fml.ModContainer
 import net.neoforged.fml.common.Mod
@@ -43,7 +44,10 @@ class FluxBatteryMod(bus: IEventBus, container: ModContainer) {
             event.registerItem(FluxCapabilities.ITEM, { stack, _ -> BatteryEnergyHandler(stack) }, BATTERY.get())
         }
         bus.addListener<BuildCreativeModeTabContentsEvent> { event ->
-            if (event.tabKey == CreativeModeTabs.TOOLS_AND_UTILITIES) event.accept(BATTERY.get())
+            if (event.tabKey == CreativeModeTabs.TOOLS_AND_UTILITIES ||
+                event.tabKey.location() == RegistryCreativeModeTabs.CREATIVE_MODE_TAB_KEY) {
+                event.accept(BATTERY.get())
+            }
         }
         container.registerConfig(ModConfig.Type.SERVER, BatteryServerConfig.SPEC)
     }

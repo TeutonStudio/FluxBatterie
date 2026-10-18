@@ -1,0 +1,5 @@
+Tool: built-in image_gen (imagegen skill), transparent background.
+Output: src/main/resources/assets/fluxbattery/textures/item/flux_battery.png
+Export: nearest-neighbor resampling to 32 x 32 pixels with ImageMagick.
+
+Use case: stylized-concept. Asset type: Minecraft mod inventory item texture, Flux Battery. Create a single crisp pixel-art sprite on a genuinely transparent square background. A small vertical industrial battery with squared dark graphite casing, metallic gray bevels and terminal at top, a luminous cyan/teal flux energy core, three segmented energy cells and subtle circuit traces. Minecraft / Flux Networks technological aesthetic. Orthographic front view, centered, occupies 85 percent of image, readable at tiny inventory size. Strict coarse pixel art aligned to a 32 by 32 logical grid, hard square pixels, limited palette, no smoothing, no text, no letters, no shadow outside sprite, no frame or scenery. The same dark graphite and teal palette will be used in its configuration terminal.

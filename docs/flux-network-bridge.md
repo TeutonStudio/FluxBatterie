@@ -10,7 +10,7 @@ Der isolierte Ladezeit-Prototyp ist separat in `16cea0f` gesichert. Client, Dedi
 
 ## Auslieferung
 
-Nur `build/libs/fluxbattery-0.1.0-dev.jar` wird ausgeliefert. Es enthält keine Klassen oder Ressourcen unter `sonar/`. Das unveränderte Flux-JAR wird sowohl in der Entwicklungsumgebung als auch in der Installation geladen. `patchedFlux`, der Java-Bridge-SourceSet und vollständige Ersatzklassen entfallen.
+Nur `build/libs/fluxbattery-0.1.1.jar` wird ausgeliefert. Es enthält keine Klassen oder Ressourcen unter `sonar/`. Das unveränderte Flux-JAR wird sowohl in der Entwicklungsumgebung als auch in der Installation geladen. `patchedFlux`, der Java-Bridge-SourceSet und vollständige Ersatzklassen entfallen.
 
 NeoForge liest `META-INF/coremods.json` und führt `coremods/fluxbattery.js` vor der Klassendefinition aus. Das Skript löst nur freigegebene NeoForge-/ASM-Klassen auf. Sämtliche neuen JVM-Klassen bleiben Kotlin; das frühe JavaScript-Skript ist die ausdrücklich dokumentierte technische Abweichung.
 
