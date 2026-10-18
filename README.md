@@ -9,7 +9,7 @@ Auf Client und Server installieren:
 - NeoForge **21.1.231**, Java **21**
 - Mekanism **1.21.1-10.7.19.85** (interne Mod-Version `10.7.19`)
 - Kotlin for Forge **5.9.0** (NeoForge-Version)
-- `fluxbattery-0.1.1.jar` aus `build/libs/`
+- `fluxbattery-0.1.2.jar` aus `build/libs/`
 - originales `FluxNetworks-1.21.1-8.0.0.jar` (CurseForge-Datei **6089446**)
 
 **Ausgeliefert wird nur das Flux-Battery-JAR.** Ein Ladezeit-Patch erweitert die originalen Flux-Klassen im Speicher. Ein altes Ersatz-/Bridge-JAR muss aus dem Mods-Ordner entfernt werden. Mod-ID und Flux-Speicherformate bleiben erhalten.
@@ -64,7 +64,7 @@ Der Client-Smoke-Test zeigt eine synthetische Konfigurationsvorschau, speichert 
 
 ### Start in IntelliJ IDEA
 
-Die eingecheckte Gradle-Startkonfiguration **Flux Battery Client** auswählen oder im Gradle-Fenster `runClient` ausführen. Im Terminal funktioniert `./gradlew runClient` mit Java 21. Diese Aufgabe bereitet die Startdateien vor und übergibt den benötigten Java-Modulpfad sowie die Modulfreigaben an den Spielprozess.
+Die eingecheckte Gradle-Startkonfiguration **Flux Battery Client** auswählen oder im Gradle-Fenster `runClient` ausführen. Im Terminal funktioniert `./gradlew runClient` mit Java 21. JEI **19.39.0.372** wird für diesen Client-Testlauf automatisch geladen (auch mit `-PpackagedAddon`). Diese Aufgabe bereitet die Startdateien vor und übergibt den benötigten Java-Modulpfad sowie die Modulfreigaben an den Spielprozess.
 
 Für Server und GameTests stehen **Flux Battery Server** (`runServer`) und **Flux Battery GameTests** (`runGameTestServer`) bereit. Die automatisch erzeugten Application-Konfigurationen sind im Build deaktiviert, damit ein Gradle-Neuladen sie nicht erneut anlegt. In bestehenden IDEA-Projekten nach dem Neuladen alte Application-Konfigurationen **Client**, **Server** und **GameTestServer** einmal entfernen und **Flux Battery Client** auswählen. Die gemeinsame Gradle-Konfiguration funktioniert auch mit „Build and run using: Gradle“.
 

@@ -3,8 +3,9 @@ loaderVersion="[5.9,6)"
 license="All Rights Reserved"
 [[mods]]
 modId="fluxbattery"
-version="0.1.1"
+version="0.1.2"
 displayName="Flux Battery"
+logoFile="fluxbattery-icon.png"
 description='''A portable virtual Flux Point for Mekanism energy slots.'''
 [[dependencies.fluxbattery]]
 modId="neoforge"

@@ -1,5 +1,15 @@
 # Build- und Testbericht — 16.10.2026
 
+## Release 0.1.2 — 18.10.2026
+
+Sauberer Build mit drei Unit-Tests, alle 16 GameTests mit dem paketierten Addon, Client-Smoke-Test mit JEI und Distributionsprüfung erfolgreich. Das neue Mod-Icon ist im JAR enthalten und registriert. Versions- und Hashnachweis: [evidence/release-0.1.2.txt](evidence/release-0.1.2.txt).
+
+## Nachprüfung Ausrüstanimation und JEI — 18.10.2026
+
+Die Batterie unterdrückt die erneute Ausrüstanimation bei synchronisierten Energie- und Konfigurationsänderungen derselben Batterie. Slotwechsel, andere Items und Batterien mit anderer Identität lösen sie weiterhin aus. `batteryReequipAnimation` deckt diese Fälle ab; `./gradlew build prepareClientRun runGameTestServer` war erfolgreich, alle 16 GameTests bestanden.
+
+JEI 19.39.0.372 ist ausschließlich im Client-SourceSet als Laufzeitabhängigkeit eingebunden. `runClient -PclientSmoke --offline` und derselbe Lauf mit `-PpackagedAddon` starteten erfolgreich mit JEI in der Modliste, renderten die GUI-Vorschau und beendeten sich automatisch. Die sichtbare Handanimation im Spiel wurde nicht manuell geprüft. Die Distributionsprüfung war erfolgreich.
+
 ## Nachprüfung Durchfluss — 18.10.2026
 
 Neue Batterien haben jetzt ein Standardlimit von 100.000.000 statt 1.000.000 FE pro Flux-Zyklus. Bestehende Item-Konfigurationen behalten ihr gespeichertes Limit; es kann in der Batterieoberfläche erhöht oder deaktiviert werden. Das versorgende Plug-Limit bleibt separat wirksam.

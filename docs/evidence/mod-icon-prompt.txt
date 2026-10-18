@@ -1,0 +1,12 @@
+Tool: built-in image_gen (imagegen skill).
+Output: src/main/resources/fluxbattery-icon.png
+Export: 512 x 512 pixels, Lanczos resampling, optimized RGB PNG, below 512 KiB.
+
+Use case: stylized-concept.
+Asset type: square Minecraft mod icon for "Flux Battery", used in the mod list and distribution pages.
+Primary request: Create a polished, distinctive icon of a portable wireless flux energy battery. Single chunky upright industrial battery with a squared dark graphite casing, beveled steel corners, short broad top terminal, and three luminous cyan-teal energy segments on its front. A small angular lightning motif integrated in the front energy core. Two short symmetrical cyan wireless signal arcs above the upper shoulders communicate wireless energy transfer.
+Style/medium: premium voxel-inspired game icon, crisp angular forms, restrained pixel-like stepped edges, richly shaded but simple, no photorealism. Strong recognizable silhouette readable at 64px.
+Composition/framing: square 1024x1024, centered close-up battery in slight three-quarter view, fills about 78 percent of frame, generous uncluttered outer margin. Dark charcoal square backdrop with subtle teal halo behind the battery; corners fully filled.
+Color palette: graphite black, gunmetal gray, luminous turquoise and cyan matching a dark technology terminal.
+Lighting/mood: controlled cyan glow, sharp clean edges, energetic technical feel.
+Constraints: one battery only; no text, letters, numbers, watermark, Minecraft wordmark, external brand logos, scenery, cables, tiny decorative detail, or mockup presentation. Finished icon filling the square canvas.

@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "2.1.21"
     id("net.neoforged.moddev") version "2.0.141"
 }
-version = "0.1.1"
+version = "0.1.2"
 group = "de.teutonstudio.fluxbattery"
 base.archivesName.set("fluxbattery")
 java.toolchain.languageVersion.set(JavaLanguageVersion.of(21))
@@ -14,12 +14,16 @@ repositories {
     mavenCentral()
     maven("https://thedarkcolour.github.io/KotlinForForge/")
     maven("https://modmaven.dev/")
+    maven("https://maven.blamejared.com/") { content { includeGroup("mezz.jei"); includeGroup("net.mezzdev.config") } }
     maven("https://cursemaven.com") { content { includeGroup("curse.maven") } }
 }
 // Packaged smoke runs exclude loose main output, preventing a resource-only duplicate mod.
 val packagedRun = if (project.hasProperty("packagedAddon")) sourceSets.create("packagedRun").apply {
     runtimeClasspath += sourceSets.main.get().runtimeClasspath - sourceSets.main.get().output
 } else null
+val clientRuntime by sourceSets.creating {
+    runtimeClasspath += (packagedRun ?: sourceSets.main.get()).runtimeClasspath
+}
 neoForge {
     version = "21.1.231"
     runs {
@@ -29,7 +33,12 @@ neoForge {
             disableIdeRun()
             if (packagedRun != null) sourceSet.set(packagedRun)
         }
-        create("client") { client(); gameDirectory = file("run-client"); if (project.hasProperty("clientSmoke")) systemProperty("fluxbattery.clientSmoke", "true") }
+        create("client") {
+            sourceSet.set(clientRuntime)
+            client()
+            gameDirectory = file("run-client")
+            if (project.hasProperty("clientSmoke")) systemProperty("fluxbattery.clientSmoke", "true")
+        }
         create("server") {
             server(); programArgument("--nogui")
             if (project.hasProperty("dedicatedRegression")) {
@@ -44,6 +53,7 @@ neoForge {
 }
 val originalFlux = files("libs/FluxNetworks-1.21.1-8.0.0.jar")
 dependencies {
+    add(clientRuntime.runtimeOnlyConfigurationName, "mezz.jei:jei-1.21.1-neoforge:19.39.0.372")
     implementation("thedarkcolour:kotlinforforge-neoforge:5.9.0")
     implementation("mekanism:Mekanism:1.21.1-10.7.19.85")
     if (project.hasProperty("packagedAddon")) runtimeOnly(files(tasks.named("jar")))

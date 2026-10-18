@@ -65,6 +65,26 @@ class BatteryGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 40)
+    fun batteryReequipAnimation(helper: GameTestHelper) {
+        val item = FluxBatteryMod.BATTERY.get()
+        val original = ItemStack(item)
+        BatteryStateService.identity(original)
+        val updated = original.copy()
+        BatteryStateService.receive(updated, 1000, false)
+        BatteryStateService.setConfig(updated, BatteryConfig(customName = "Updated", priority = 10))
+        check(!item.shouldCauseReequipAnimation(original, updated, false)) {
+            "Battery state updates must not replay the equip animation"
+        }
+        check(item.shouldCauseReequipAnimation(original, updated, true)) { "Slot changes must animate" }
+        val otherBattery = ItemStack(item)
+        BatteryStateService.identity(otherBattery)
+        check(item.shouldCauseReequipAnimation(original, otherBattery, false)) { "Replacing a battery must animate" }
+        check(item.shouldCauseReequipAnimation(original, ItemStack(net.minecraft.world.item.Items.STICK), false))
+        check(item.shouldCauseReequipAnimation(original, ItemStack.EMPTY, false))
+        helper.succeed()
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 40)
     fun creativeTabIntegration(helper: GameTestHelper) {
         net.minecraft.world.item.CreativeModeTabs.tryRebuildTabContents(
             helper.level.enabledFeatures(), true, helper.level.registryAccess())

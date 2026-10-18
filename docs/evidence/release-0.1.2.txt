@@ -1,0 +1,22 @@
+Flux Battery 0.1.2 — geprüft am 18.10.2026
+
+JAVA_HOME=/home/alex/.gradle/jdks/eclipse_adoptium-21-amd64-linux.2
+./gradlew clean build runGameTestServer runClient -PpackagedAddon -PclientSmoke --offline
+BUILD SUCCESSFUL
+Unit-Tests: 3, keine Fehler, keine übersprungenen Tests
+GameTests: All 16 required tests passed
+Client: Flux Battery 0.1.2 und Just Enough Items 19.39.0.372 in der Modliste
+Client: Flux Battery client smoke screenshot captured; sauber beendet
+Die synthetische Vorschau prüft keine Handanimation im Spiel.
+
+python3 scripts/verify-distribution.py
+Distribution verified: single addon, no sonar classes, pristine Flux 8.0.0 input
+Artefakt: build/libs/fluxbattery-0.1.2.jar
+SHA-256: 692c4a50082a340979072ebf2bc60074272e78f4459ba3f9ad22e91e6a7e6062
+
+Zusätzliche Prüfung des JAR-Inhalts:
+META-INF/neoforge.mods.toml: Mod-Version 0.1.2
+fluxbattery-icon.png enthalten und über logoFile registriert
+Keine JEI-Klassen im Addon-JAR
+
+git diff --check: erfolgreich

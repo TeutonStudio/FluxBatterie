@@ -6,6 +6,12 @@ import net.minecraft.world.item.TooltipFlag
 import net.minecraft.network.chat.Component
 
 class FluxBatteryItem(properties: Properties) : Item(properties) {
+    override fun shouldCauseReequipAnimation(oldStack: ItemStack, newStack: ItemStack, slotChanged: Boolean): Boolean {
+        // Synced energy/configuration updates do not replace the battery in the player's hand.
+        return slotChanged || !ItemStack.isSameItem(oldStack, newStack) ||
+            oldStack.get(BatteryComponents.IDENTITY.get()) != newStack.get(BatteryComponents.IDENTITY.get())
+    }
+
     override fun use(level: net.minecraft.world.level.Level, player: net.minecraft.world.entity.player.Player, hand: net.minecraft.world.InteractionHand): net.minecraft.world.InteractionResultHolder<ItemStack> {
         val stack = player.getItemInHand(hand)
         if (player is net.minecraft.server.level.ServerPlayer) BatteryNetworking.open(player, hand)
