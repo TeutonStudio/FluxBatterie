@@ -5,7 +5,11 @@ import net.neoforged.neoforge.energy.IEnergyStorage
 import sonar.fluxnetworks.api.energy.IFNEnergyStorage
 
 class BatteryEnergyHandler(private val stack: ItemStack) : IEnergyStorage, IFNEnergyStorage {
-    override fun receiveEnergyL(maxReceive: Long, simulate: Boolean) = BatteryStateService.receive(stack, maxReceive, simulate)
+    override fun receiveEnergyL(maxReceive: Long, simulate: Boolean): Long {
+        if (maxReceive <= 0) return 0
+        val buffered = BatteryStateService.receive(stack, maxReceive, simulate)
+        return buffered + FluxBatteryHostManager.receiveOverflow(stack, maxReceive - buffered, simulate)
+    }
     override fun extractEnergyL(maxExtract: Long, simulate: Boolean) = BatteryStateService.extract(stack, maxExtract, simulate)
     override fun getEnergyStoredL() = BatteryStateService.energy(stack).storedEnergy
     override fun getMaxEnergyStoredL() = BatteryStateService.energy(stack).capacity

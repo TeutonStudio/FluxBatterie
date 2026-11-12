@@ -57,4 +57,5 @@ object BatteryComponents {
     val IDENTITY = REGISTER.register("identity", Supplier { DataComponentType.builder<UUID>().persistent(UUIDUtil.CODEC).networkSynchronized(ByteBufCodecs.fromCodec(UUIDUtil.CODEC)).build() })
     val CONFIG = REGISTER.register("configuration", Supplier { DataComponentType.builder<BatteryConfig>().persistent(BatteryConfig.CODEC).networkSynchronized(ByteBufCodecs.fromCodec(BatteryConfig.CODEC)).build() })
     val ENERGY = REGISTER.register("energy", Supplier { DataComponentType.builder<BatteryEnergy>().persistent(BatteryEnergy.CODEC).networkSynchronized(ByteBufCodecs.fromCodec(BatteryEnergy.CODEC)).build() })
+    val NETWORK_INPUT = REGISTER.register("network_input", Supplier { DataComponentType.builder<Long>().persistent(NON_NEGATIVE_LONG).networkSynchronized(ByteBufCodecs.VAR_LONG).build() })
 }

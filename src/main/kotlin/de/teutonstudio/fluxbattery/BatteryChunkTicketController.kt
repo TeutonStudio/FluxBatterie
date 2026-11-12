@@ -15,7 +15,7 @@ object BatteryChunkTicketController {
     val CONTROLLER = TicketController(ResourceLocation.fromNamespaceAndPath(FluxBatteryMod.ID, "battery")) { level, helper ->
         for (pos in helper.blockTickets.keys.toList()) {
             val tile = level.getBlockEntity(pos) as? TileEntityMekanism
-            val slot = tile?.let { MekanismHostAdapter.dischargeSlots(it).firstOrNull { (_, s) -> s.stack.item is FluxBatteryItem }?.second }
+            val slot = tile?.let { MekanismHostAdapter.energySlots(it).firstOrNull { (_, s) -> s.stack.item is FluxBatteryItem }?.second }
             val config = slot?.let { BatteryStateService.config(it.stack) }
             val key = GlobalPos.of(level.dimension(), pos)
             val pair = helper.blockTickets[pos]!!
@@ -29,7 +29,7 @@ object BatteryChunkTicketController {
     }
     private fun allowed(config: BatteryConfig) = BatteryServerConfig.chunkLoading.get() && FluxConfig.enableChunkLoading && config.chunkLoadingEnabled
     private fun quota(key: GlobalPos, owner: UUID) = owners[key] == owner || owners.values.count { it == owner } < BatteryServerConfig.ticketQuota.get()
-    fun update(point: HostedFluxPoint) {
+    fun update(point: HostedFluxDevice) {
         val config = point.binding.configuration
         val valid = point.currentStack() != null && allowed(config) && FluxBatteryHostManager.permitted(point.network, config) && quota(point.globalPos, config.ownerUuid)
         if (!valid) { release(point); return }
@@ -43,7 +43,7 @@ object BatteryChunkTicketController {
             }
         }
     }
-    fun release(point: HostedFluxPoint) {
+    fun release(point: HostedFluxDevice) {
         if (!point.ticket && !owners.containsKey(point.globalPos)) return
         val level = point.tile.level as? ServerLevel ?: return
         val pos = point.binding.key.position

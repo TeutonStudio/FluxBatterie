@@ -7,6 +7,23 @@ import java.util.UUID
 object BatteryStateService {
     fun energy(stack: ItemStack): BatteryEnergy = stack.get(BatteryComponents.ENERGY.get()) ?: BatteryEnergy(0, BatteryServerConfig.capacity.get())
     fun config(stack: ItemStack): BatteryConfig = stack.get(BatteryComponents.CONFIG.get()) ?: BatteryConfig()
+    fun networkInput(stack: ItemStack): Long = stack.get(BatteryComponents.NETWORK_INPUT.get()) ?: 0L
+    fun receiveNetworkInput(stack: ItemStack, requested: Long, simulate: Boolean): Long {
+        if (stack.isEmpty || requested <= 0) return 0
+        val pending = networkInput(stack)
+        val accepted = minOf(requested, Long.MAX_VALUE - pending)
+        if (!simulate && accepted > 0) stack.set(BatteryComponents.NETWORK_INPUT.get(), pending + accepted)
+        return accepted
+    }
+    fun extractNetworkInput(stack: ItemStack, requested: Long): Long {
+        val pending = networkInput(stack)
+        val extracted = EnergyMath.extract(pending, requested)
+        if (extracted > 0) {
+            if (extracted == pending) stack.remove(BatteryComponents.NETWORK_INPUT.get())
+            else stack.set(BatteryComponents.NETWORK_INPUT.get(), pending - extracted)
+        }
+        return extracted
+    }
     fun identity(stack: ItemStack): UUID {
         return stack.get(BatteryComponents.IDENTITY.get()) ?: UUID.randomUUID().also {
             stack.set(BatteryComponents.IDENTITY.get(), it)

@@ -12,11 +12,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 abstract class EnergySlotMixin : BatteryDischargeSlot {
     @Unique
     override var fluxBatteryDischargeSlot: Boolean = false
+    @Unique
+    override var fluxBatteryChargeSlot: Boolean = false
     private companion object {
         @JvmStatic
         @Inject(method = ["fill", "fillOrConvert"], at = [At("RETURN")], remap = false)
         private fun markDischargeSlot(ci: CallbackInfoReturnable<EnergyInventorySlot>) {
             (ci.returnValue as BatteryDischargeSlot).fluxBatteryDischargeSlot = true
+        }
+
+        @JvmStatic
+        @Inject(method = ["drain"], at = [At("RETURN")], remap = false)
+        private fun markChargeSlot(ci: CallbackInfoReturnable<EnergyInventorySlot>) {
+            (ci.returnValue as BatteryDischargeSlot).fluxBatteryChargeSlot = true
         }
     }
 }

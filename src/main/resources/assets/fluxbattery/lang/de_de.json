@@ -2,7 +2,7 @@
   "item.fluxbattery.flux_battery": "Flux-Batterie",
   "tooltip.fluxbattery.configure": "Rechtsklick: Netzwerk einstellen (an Blöcken: Shift-Rechtsklick)",
   "tooltip.fluxbattery.unconfigured": "Vor dem Einsetzen in den Energieslot ein Netzwerk wählen und speichern.",
-  "screen.fluxbattery.subtitle": "FLUX NETWORKS / MOBILER POINT",
+  "screen.fluxbattery.subtitle": "FLUX NETWORKS / MOBILE BATTERIE",
   "screen.fluxbattery.energy": "Puffer",
   "screen.fluxbattery.disconnected": "Kein Netzwerk · getrennt",
   "screen.fluxbattery.invalid_network": "Netzwerk fehlt / kein Zugriff",
@@ -27,5 +27,6 @@
   "screen.fluxbattery.limit_error": "Limit von 0 bis 9.223.372.036.854.775.807 eingeben.",
   "screen.fluxbattery.no_networks": "Zuerst ein zugängliches Netzwerk in Flux Networks anlegen.",
   "screen.fluxbattery.select_network": "Netzwerk auswählen und speichern.",
-  "screen.fluxbattery.ready": "Bereit zum Einsetzen · in der Hand getrennt."
+  "screen.fluxbattery.ready": "Bereit zum Einsetzen · in der Hand getrennt.",
+  "tooltip.fluxbattery.network_input": "%s FE zur Netzwerkübergabe (Ladeslot)"
 }

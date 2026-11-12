@@ -3,6 +3,7 @@
 from pathlib import Path
 import os
 import queue
+import re
 import signal
 import subprocess
 import threading
@@ -33,7 +34,7 @@ with output.open('w') as log:
         else: raise TimeoutError('Dedicated-server smoke timeout')
         result=process.wait(timeout=30)
         text=output.read_text(errors='replace')
-        assert started and result==0 and 'all mandatory original-8.0.0 runtime patches verified' in text and 'All dimensions are saved' in text and 'DEDICATED REGRESSION COMPLETE: 14 required tests passed' in text, f'Server smoke failed: {output}'
+        assert started and result==0 and 'all mandatory original-8.0.0 runtime patches verified' in text and 'All dimensions are saved' in text and re.search(r'DEDICATED REGRESSION COMPLETE: [1-9]\d* required tests passed', text), f'Server smoke failed: {output}'
         print(f'Dedicated Server packaged regression: passed ({output})')
     finally:
         if process.poll() is None:

@@ -1,12 +1,12 @@
 modLoader="kotlinforforge"
 loaderVersion="[5.9,6)"
-license="All Rights Reserved"
+license="MIT"
 [[mods]]
 modId="fluxbattery"
-version="0.1.2"
+version="0.1.3-beta.1"
 displayName="Flux Battery"
 logoFile="fluxbattery-icon.png"
-description='''A portable virtual Flux Point for Mekanism energy slots.'''
+description='''A portable Flux battery for Mekanism: powers machines as a virtual Flux Point and feeds excess charging energy into your network as a virtual Flux Plug.'''
 [[dependencies.fluxbattery]]
 modId="neoforge"
 type="required"

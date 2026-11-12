@@ -1,0 +1,51 @@
+Flux Battery 0.1.3-beta.1 — geprüft am 12.11.2026 (Europe/Berlin)
+
+Artefakt: build/libs/fluxbattery-0.1.3-beta.1.jar
+SHA-256: f4e00ed64f01aa67bd14d336e8753c50988ec77f142871f09221c8d4257d9e48
+
+Umgebung: Minecraft 1.21.1 / NeoForge 21.1.231 / Temurin 21.0.7+6
+Mekanism 1.21.1-10.7.19.85 (Mod-Version 10.7.19), KFF 5.9.0, JEI 19.39.0.372 (Client)
+Original Flux Networks 8.0.0: 29e511b2d76f85bd247aa213a92bb059ecc037fcc3fed82baffcff97b638d3a6
+
+Ausführung mit JAVA_HOME=/home/alex/.gradle/jdks/eclipse_adoptium-21-amd64-linux.2
+./gradlew build runGameTestServer -PpackagedAddon --offline --no-daemon --max-workers=2
+  BUILD SUCCESSFUL; 3 Unit-Tests, keine Fehler/übersprungenen Tests; 23/23 GameTests.
+  Loader-Strukturprüfung und JSON-Steuerzeichen-Rundlauf erfolgreich.
+python3 scripts/test-restart.py
+  Frische gemeinsame Welt, zwei getrennte JVMs: prepare und verify je 25/25.
+  Beide JVMs sauber beendet, alle Dimensionen gespeichert.
+python3 scripts/test-server.py
+  Regulärer Dedicated Server: 23/23, sauberer Konsolenstopp und Weltspeicherung.
+python3 scripts/test-loader.py
+  Kompatible synthetische Mixin-/Coremod-Testmods gemeinsam: 23/23.
+  Pflichtkonflikt, falsche Version und modifiziertes Original: erwarteter Startabbruch.
+./gradlew runClient -PpackagedAddon -PclientSmoke --offline --no-daemon --max-workers=2
+  Mit JEI; synthetische Vorschau, Screenshot und sauberes Beenden erfolgreich.
+  docs/evidence/battery-screen.png (Deutsch, 854 x 480) visuell geprüft.
+python3 scripts/verify-distribution.py
+  Ein Addon-JAR; MIT und Upstream-Hinweise enthalten; alle JSON-Ressourcen strikt gültig.
+  Keine sonar/-Ersatzklassen, Testfixture- oder Loader-Toolklassen im Addon.
+git diff --check
+  Erfolgreich.
+
+Die finalen Build-/Neustartprüfungen bestätigen denselben oben genannten JAR-Hash
+wie Dedicated-, Loader- und Client-Prüfungen.
+
+Automatisch zusätzlich geprüft: echter Batterieumzug Overworld -> Nether,
+Ticketkontingent pro Besitzer über Dimensionen, unabhängiges Kontingent zweiter Besitzer.
+Testkorrekturen: eigener Quoten-Testbesitzer; Neustartwelt pro Durchlauf isoliert,
+damit zurückgelassene Netzwerke fehlgeschlagener Vorläufe keine Quoten verbrauchen.
+
+Offen: tatsächliche Bedienung durch zwei echte Spieler, reale Chunk-Entladung/Rückkehr,
+manueller Dimensionswechsel, längerer Minerbetrieb ohne Spieler und mehrstündiger
+Modpackbetrieb mit konkreten Drittmods. Kein stabiler Release-Nachweis.
+Abnahmeprotokoll: docs/release-acceptance.md
+Quellstand: docs/evidence/release-0.1.3-beta.1-source.sha256
+
+Logdateien des erfolgreichen Prüflaufs (SHA-256):
+112296abc3d9ec799dcf8376928259e59c8338d4e979ec3ad8950449b6a8292f  build/release-build.log
+e816d5a57fb277a295cd924f26037c4d3e0f163efbd61c476f4255d1afae9d7d  build/restart-prepare.log
+618f1312009e15cd2ba57ac1509ee0088b41a953bde892d18cbdaa9a7cf67599  build/restart-verify.log
+7adc2086ffaa023d194cf1a465e7067c4f795e9771ee1b5c2717206c0b37d3f6  build/server-smoke.log
+a9f881023eb001c68c3fb37962e12efb12acfefa5021d44eab28d0670926c36b  build/release-loader.log
+0d4c72baa0fe6e57dd7ed9391bd4feba98b46ee17689e91170d84ffda668f2f4  build/release-client.log

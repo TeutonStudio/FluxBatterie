@@ -202,6 +202,68 @@ class BatteryGameTests {
         check(BatteryStateService.energy(slot.stack).storedEnergy == 0L)
         helper.succeed()
     }
+    @GameTest(template = "empty", timeoutTicks = 100)
+    fun crossDimensionMoveAndPerOwnerQuota(helper: GameTestHelper) {
+        val enabled = BatteryServerConfig.chunkLoading.get()
+        val fluxEnabled = sonar.fluxnetworks.FluxConfig.enableChunkLoading
+        val quota = BatteryServerConfig.ticketQuota.get()
+        val otherLevel = checkNotNull(helper.level.server.getLevel(net.minecraft.world.level.Level.NETHER))
+        val positions = listOf(BlockPos(8000, 100, 8000), BlockPos(8032, 100, 8000))
+        val oldStates = positions.map { otherLevel.getBlockState(it) }
+        val network = network(helper)
+        val tiles = mutableListOf<TileEntityMekanism>()
+        try {
+            BatteryServerConfig.chunkLoading.set(true)
+            BatteryServerConfig.ticketQuota.set(1)
+            sonar.fluxnetworks.FluxConfig.enableChunkLoading = true
+            val origin = machine(helper, "enrichment_chamber")
+            tiles.add(origin)
+            for (pos in positions) {
+                otherLevel.setBlockAndUpdate(pos, BuiltInRegistries.BLOCK.get(ResourceLocation.parse("mekanism:enrichment_chamber")).defaultBlockState())
+                tiles.add(otherLevel.getBlockEntity(pos) as TileEntityMekanism)
+            }
+            // Use a distinct owner so persisted restart fixtures do not consume this test quota.
+            val originalConfig = config(helper, network).copy(chunkLoadingEnabled = true, ownerUuid = UUID.randomUUID())
+            val source = insert(origin, originalConfig)
+            BatteryStateService.receive(source.stack, 345, false)
+            val identity = BatteryStateService.identity(source.stack)
+            val blocked = insert(tiles[1], originalConfig)
+            insert(tiles[2], originalConfig.copy(ownerUuid = UUID.randomUUID()))
+            val sourceHost = checkNotNull(origin.getData(FluxBatteryMod.HOST_ATTACHMENT.get()).point)
+            check(sourceHost.ticket) { "The source owner did not receive its initial ticket" }
+            check(tiles[1].getData(FluxBatteryMod.HOST_ATTACHMENT.get()).point?.ticket == false) {
+                "One owner exceeded the ticket quota across dimensions"
+            }
+            check(tiles[2].getData(FluxBatteryMod.HOST_ATTACHMENT.get()).point?.ticket == true) {
+                "A different owner's ticket quota was incorrectly consumed"
+            }
+            network.onEndServerTick()
+            val moved = source.extractItem(1, Action.EXECUTE, AutomationType.MANUAL)
+            check(!sourceHost.ticket && !sourceHost.active)
+            blocked.setEmpty()
+            check(blocked.insertItem(moved, Action.EXECUTE, AutomationType.MANUAL).isEmpty)
+            FluxBatteryHostManager.tick(tiles[1])
+            network.onEndServerTick()
+            val destination = checkNotNull(tiles[1].getData(FluxBatteryMod.HOST_ATTACHMENT.get()).point)
+            check(destination.ticket && destination.active) { "The moved battery did not acquire the freed cross-dimension ticket" }
+            check(destination.globalPos.dimension() == net.minecraft.world.level.Level.NETHER)
+            check(BatteryStateService.identity(blocked.stack) == identity)
+            check(BatteryStateService.config(blocked.stack) == originalConfig)
+            check(BatteryStateService.energy(blocked.stack).storedEnergy == 345L)
+            check(network.getConnectionByPos(sourceHost.globalPos) == null)
+            check(network.getConnectionByPos(destination.globalPos) === destination)
+            blocked.setEmpty()
+            check(!destination.ticket && !destination.active)
+            helper.succeed()
+        } finally {
+            cleanup(network, *tiles.toTypedArray())
+            positions.forEachIndexed { index, pos -> otherLevel.setBlockAndUpdate(pos, oldStates[index]) }
+            BatteryServerConfig.chunkLoading.set(enabled)
+            BatteryServerConfig.ticketQuota.set(quota)
+            sonar.fluxnetworks.FluxConfig.enableChunkLoading = fluxEnabled
+        }
+    }
+
     @GameTest(template = "empty", timeoutTicks = 40)
     fun chunkTicketsAndRemoval(helper: GameTestHelper) {
         val enabled = BatteryServerConfig.chunkLoading.get()
@@ -311,9 +373,20 @@ class BatteryGameTests {
             check(demand > 0 && demand <= container.maxEnergy)
             BatteryStateService.extract(slot.stack, Long.MAX_VALUE, false)
             container.setEnergy(0)
+            // Mining/search duration varies with the world: its first supply may already
+            // have charged the battery completely. Give the independent stress phase a
+            // fixed supply after verifying above that normal mining consumed energy.
+            plug.transferHandler.applyConfiguration(FluxDeviceConfigComponent.EMPTY, 1_000_000_000L)
+            plug.transferHandler.setDisableLimit(true)
             val before = plug.transferHandler.buffer
             network.onEndServerTick()
-            check(before - plug.transferHandler.buffer == 100_000_000L) { "Default battery limit must allow 100 million FE per cycle" }
+            val transferred = before - plug.transferHandler.buffer
+            check(transferred == 100_000_000L) {
+                "Default battery limit must allow 100 million FE per cycle: transferred=$transferred, " +
+                    "sourceBefore=$before, sourceAfter=${plug.transferHandler.buffer}, " +
+                    "battery=${BatteryStateService.energy(slot.stack)}, " +
+                    "limit=${BatteryStateService.config(slot.stack).transferLimit}"
+            }
             val totalBefore = plug.transferHandler.buffer + BatteryStateService.energy(slot.stack).storedEnergy
             repeat(64) {
                 network.onEndServerTick()

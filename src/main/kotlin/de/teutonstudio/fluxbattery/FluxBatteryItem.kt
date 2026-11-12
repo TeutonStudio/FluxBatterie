@@ -27,6 +27,8 @@ class FluxBatteryItem(properties: Properties) : Item(properties) {
     override fun appendHoverText(stack: ItemStack, context: TooltipContext, lines: MutableList<Component>, flag: TooltipFlag) {
         val energy = BatteryStateService.energy(stack)
         lines.add(Component.literal("${energy.storedEnergy} / ${energy.capacity} FE"))
+        val pending = BatteryStateService.networkInput(stack)
+        if (pending > 0) lines.add(Component.translatable("tooltip.fluxbattery.network_input", pending))
         lines.add(Component.literal("Flux network: ${BatteryStateService.config(stack).networkId}"))
         lines.add(Component.translatable("tooltip.fluxbattery.configure"))
         if (BatteryStateService.config(stack).networkId == 0) {

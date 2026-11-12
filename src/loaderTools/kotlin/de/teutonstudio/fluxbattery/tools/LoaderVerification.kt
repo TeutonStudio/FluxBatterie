@@ -23,7 +23,21 @@ object LoaderVerification {
         val inv = engine as Invocable
         val jar = JarFile(root.resolve("libs/FluxNetworks-1.21.1-8.0.0.jar").toFile())
         fun original(name: String) = ClassNode().also { ClassReader(jar.getInputStream(jar.getJarEntry("$name.class"))).accept(it, ClassReader.EXPAND_FRAMES) }
-        fun quote(s: String) = "\"" + s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t") + "\""
+        fun quote(s: String) = buildString {
+            append('"')
+            for (c in s) when (c) {
+                '\\' -> append("\\\\")
+                '"' -> append("\\\"")
+                else -> if (c.code < 0x20) {
+                    append("\\u")
+                    append(c.code.toString(16).padStart(4, '0'))
+                } else append(c)
+            }
+            append('"')
+        }
+        val controlProbe = (0..31).map { it.toChar() }.joinToString("") + "\\\""
+        engine.put("jsonQuoteProbe", quote(controlProbe))
+        check(engine.eval("JSON.parse(jsonQuoteProbe)") == controlProbe) { "JSON quoting lost control characters" }
         val manifest = root.resolve("src/main/resources/coremods/fluxbattery-8.0.0.json")
         if (args.firstOrNull() == "generate") {
             val data = names.joinToString(",\n", "{\n", "\n}\n") { name ->
@@ -38,7 +52,8 @@ object LoaderVerification {
             println("Generated original 8.0.0 executable shapes: $manifest")
             return
         }
-        engine.eval("expected = " + Files.readString(manifest))
+        engine.put("fluxShapeJson", Files.readString(manifest))
+        engine.eval("expected = JSON.parse(fluxShapeJson)")
         for (name in names) {
             val node = original(name)
             inv.invokeFunction("transform", node)

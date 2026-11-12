@@ -31,7 +31,7 @@ negative = coremod('fluxbattery_conflict_fixture', 'sonar.fluxnetworks.common.co
 
 def run(label, args, success, required):
     output = root / f'build/loader-{label}.log'
-    cmd = [str(root/'gradlew'), *args, '--offline', '--max-workers=2', '--no-daemon']
+    cmd = [str(root/'gradlew'), *args, '-PpackagedAddon', '--offline', '--max-workers=2', '--no-daemon']
     with output.open('w') as log:
         result = subprocess.run(cmd, cwd=root, stdout=log, stderr=subprocess.STDOUT, timeout=300)
     text = output.read_text(errors='replace')

@@ -2,7 +2,7 @@
   "item.fluxbattery.flux_battery": "Flux Battery",
   "tooltip.fluxbattery.configure": "Right-click: configure network (on blocks: Shift-right-click)",
   "tooltip.fluxbattery.unconfigured": "Select and save a network before inserting into an energy slot.",
-  "screen.fluxbattery.subtitle": "FLUX NETWORKS / PORTABLE POINT",
+  "screen.fluxbattery.subtitle": "FLUX NETWORKS / PORTABLE BATTERY",
   "screen.fluxbattery.energy": "Buffer",
   "screen.fluxbattery.disconnected": "No network · disconnected",
   "screen.fluxbattery.invalid_network": "Network unavailable / access denied",
@@ -27,5 +27,6 @@
   "screen.fluxbattery.limit_error": "Enter a limit from 0 to 9,223,372,036,854,775,807.",
   "screen.fluxbattery.no_networks": "Create an accessible network in Flux Networks first.",
   "screen.fluxbattery.select_network": "Select a network, then save.",
-  "screen.fluxbattery.ready": "Ready to install · disconnected while held."
+  "screen.fluxbattery.ready": "Ready to install · disconnected while held.",
+  "tooltip.fluxbattery.network_input": "%s FE pending network delivery (charging slot)"
 }

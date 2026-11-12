@@ -1,6 +1,6 @@
 # Flux Battery
 
-Kotlin-Addon für Minecraft **1.21.1 / NeoForge**. Eine konfigurierte Batterie im Energie-Eingabeslot einer Mekanism-Maschine arbeitet als virtueller Flux Point. Die Energie fließt vom normalen Flux-Netzwerk in die Batterie und von dort über Mekanisms Item-Energieadapter in die Maschine. Ein Flux Controller oder zusätzlicher Point an der Maschine ist dafür nicht erforderlich.
+Kotlin-Addon für Minecraft **1.21.1 / NeoForge**. Eine konfigurierte Batterie im Energie-Eingabeslot einer Mekanism-Maschine arbeitet als virtueller Flux Point. Die Energie fließt vom normalen Flux-Netzwerk in die Batterie und von dort über Mekanisms Item-Energieadapter in die Maschine. Ein Flux Controller oder zusätzlicher Point an der Maschine ist dafür nicht erforderlich. Im Lade-Slot eines Mekanism-Blocks (z. B. Energiewürfel) arbeitet dieselbe Batterie als virtueller Flux Plug: Zuerst wird ihr eigener Puffer geladen, anschließend fließt überschüssige Energie ins konfigurierte Netzwerk.
 
 ## Installation
 
@@ -9,7 +9,7 @@ Auf Client und Server installieren:
 - NeoForge **21.1.231**, Java **21**
 - Mekanism **1.21.1-10.7.19.85** (interne Mod-Version `10.7.19`)
 - Kotlin for Forge **5.9.0** (NeoForge-Version)
-- `fluxbattery-0.1.2.jar` aus `build/libs/`
+- `fluxbattery-0.1.3-beta.1.jar` aus `build/libs/`
 - originales `FluxNetworks-1.21.1-8.0.0.jar` (CurseForge-Datei **6089446**)
 
 **Ausgeliefert wird nur das Flux-Battery-JAR.** Ein Ladezeit-Patch erweitert die originalen Flux-Klassen im Speicher. Ein altes Ersatz-/Bridge-JAR muss aus dem Mods-Ordner entfernt werden. Mod-ID und Flux-Speicherformate bleiben erhalten.
@@ -23,7 +23,8 @@ Freigegeben ist ausschließlich das unveränderte Flux Networks **8.0.0**, SHA-2
 3. Ein zugängliches Netzwerk auswählen, Name, Priorität, FE-Limit pro Zyklus, unbegrenztes Limit, Surge und optional Chunkloading einstellen; speichern.
 4. Batterie in den Energie-Eingabeslot des Digital Miners einsetzen. Leere konfigurierte Batterien werden ebenfalls angenommen.
 5. Netzwerk benötigt eine Energiequelle an einem regulären Flux Plug. Versorgung und Priorisierung erfolgen durch Flux Networks.
-6. Entnehmen beendet Verbindung und Chunk-Ticket. Dieselbe Batterie kann anschließend in eine andere geeignete Maschine eingesetzt werden.
+6. Zum Einspeisen die Batterie in einen **Item-Ladeslot** einsetzen, z. B. den Plus-Slot eines Mekanism-Energiewürfels. Dieser lädt zuerst den Batterie-Puffer. Überschüsse versorgen Points und Flux-Speicher über die normale Netzwerkverteilung; Rechte, Priorität und Transferlimit gelten auch dabei. Bei fehlendem Bedarf wird weitere Energie abgewiesen und bleibt im Ladeblock. Bereits angenommene, noch nicht verteilte Energie bleibt im Item gespeichert und erscheint im Tooltip; beim erneuten Einsetzen in einen Ladeslot wird sie weitergegeben.
+7. Entnehmen beendet Verbindung und Chunk-Ticket. Dieselbe Batterie kann anschließend in eine andere geeignete Maschine eingesetzt werden.
 
 Die Konfiguration verwendet ein dunkles Flux-Terminal mit segmentierter Energieanzeige und einem dazu passenden Item-Icon. Netzwerke lassen sich vorwärts und rückwärts wechseln. Tooltips erläutern Surge, unbegrenzten Transfer und die Voraussetzungen für Chunkloading. Deutsch und Englisch werden unterstützt. Die Energieanzeige zeigt den Stand beim Öffnen.
 
@@ -31,7 +32,7 @@ Neue Batterien erlauben standardmäßig **100 Millionen FE pro Zyklus**. Bereits
 
 Privat-/verschlüsselte Netzwerke erfordern dauerhafte Besitzer- oder Mitgliedsrechte. Passwörter werden nicht gespeichert. Nur der Batterie-Besitzer kann ihre Konfiguration bearbeiten. Netzwerkrechte werden während des Betriebs erneut geprüft.
 
-Getestet: Digital Miner (tatsächlicher Erzabbau), Enrichment Chamber, Energized Smelter. Der Mekanism-Adapter unterstützt weitere Mekanism-Maschinen mit `fill`-/`fillOrConvert`-Energieslots. Komplexe `IMultiblock`-Maschinen sind ausgeschlossen. Fremde FE-Maschinen werden nicht automatisch unterstützt; zusätzliche Mod-Adapter sind ein separates Erweiterungsziel. Bei mehreren Batterieslots arbeitet nur die Batterie im ersten passenden Slot als Point; weitere bleiben normale Energieitems.
+Getestet: Digital Miner (tatsächlicher Erzabbau), Enrichment Chamber, Energized Smelter. Der Mekanism-Adapter unterstützt weitere Mekanism-Maschinen mit `fill`-/`fillOrConvert`-Entladeslots und `drain`-Ladeslots. Komplexe `IMultiblock`-Maschinen sind ausgeschlossen. Fremde FE-Maschinen werden nicht automatisch unterstützt; zusätzliche Mod-Adapter sind ein separates Erweiterungsziel. Bei mehreren Batterieslots arbeitet nur die Batterie im ersten passenden Slot als Netzwerkverbindung (Point oder Plug); weitere bleiben normale Energieitems. Gewöhnliche FE-Item-Ladeblöcke können den lokalen Batterie-Puffer über die Standardfähigkeit laden; die automatische Netzwerk-Einspeisung benötigt den Mekanism-Hostadapter.
 
 ## Serverkonfiguration
 
@@ -60,6 +61,8 @@ python3 scripts/verify-distribution.py
 
 Java 21 über `JAVA_HOME` auswählen; Gradle kann die Toolchain alternativ herunterladen. Der unveränderte MDK-Wrapper ist Gradle **9.2.1**, ModDevGradle **2.0.141**, Kotlin **2.1.21**. Die Bootstrap-Datei lädt nur das festgelegte Original-Flux-JAR und prüft SHA-256; Gradle lädt Mekanism/KFF aus den festgelegten Maven-Repositories. `build` erzeugt ausschließlich das Addon in `build/libs/`; `patchedFlux` und der Bridge-SourceSet entfallen. Für einen Lauf mit dem gebauten Addon-JAR statt losen Entwicklungsklassen: `./gradlew runGameTestServer -PpackagedAddon`. Die Bytecode-Prüfstrukturen sind eingecheckt; `verifyLoader` prüft Originalklassen sowie absichtlich veränderte und fehlende Methoden und gehört zu `check`. `generateFluxShapes` ist ausschließlich ein Wartungswerkzeug nach bewusst geprüfter Änderung der Zielversion.
 
+Der Neustarttest erzeugt für jeden Durchlauf eine frische Testwelt unter `build/restart-world-*`; seine beiden JVMs verwenden dieselbe Welt. Vorherige Testwelten bleiben erhalten.
+
 Der Client-Smoke-Test zeigt eine synthetische Konfigurationsvorschau, speichert `docs/evidence/battery-screen.png` und beendet den Client.
 
 ### Start in IntelliJ IDEA
@@ -69,6 +72,12 @@ Die eingecheckte Gradle-Startkonfiguration **Flux Battery Client** auswählen od
 Für Server und GameTests stehen **Flux Battery Server** (`runServer`) und **Flux Battery GameTests** (`runGameTestServer`) bereit. Die automatisch erzeugten Application-Konfigurationen sind im Build deaktiviert, damit ein Gradle-Neuladen sie nicht erneut anlegt. In bestehenden IDEA-Projekten nach dem Neuladen alte Application-Konfigurationen **Client**, **Server** und **GameTestServer** einmal entfernen und **Flux Battery Client** auswählen. Die gemeinsame Gradle-Konfiguration funktioniert auch mit „Build and run using: Gradle“.
 
 Bei `Unknown module: cpw.mods.securejarhandler` und anschließendem `InaccessibleObjectException` für `MethodHandles.Lookup.IMPL_LOOKUP` prüfen, ob stattdessen `:net.neoforged.devlaunch.Main.main()` ausgeführt wird. Diesen generischen Main-Start durch **Flux Battery Client** ersetzen. Keine einzelnen `--add-opens`-Argumente ergänzen: Zum Start gehören auch der Modulpfad, die Spielargumente und die Mod-Verzeichnisse. Die Dateien unter `build/moddev/` werden von Gradle erzeugt und sollten nicht von Hand bearbeitet werden.
+
+## Lizenz und Änderungen
+
+Flux Battery steht unter der [MIT-Lizenz](LICENSE). Hinweise zu Flux Networks und dessen MIT-Lizenz stehen in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt); beide Dateien werden im Addon-JAR mitgeliefert. Die ursprüngliche MDK-Vorlagenlizenz bleibt separat in `TEMPLATE_LICENSE.txt` erhalten.
+
+Änderungen: [CHANGELOG.md](CHANGELOG.md). Aktueller Veröffentlichungskandidat: **0.1.3-beta.1**. Das ist eine Beta; vollständige Multiplayer-, Chunk-Unload- und Langzeitabnahme stehen noch aus. Konkrete Prüfschritte und ihr Status: [docs/release-acceptance.md](docs/release-acceptance.md).
 
 ## Entwicklungsstand
 

@@ -14,7 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 abstract class BasicSlotMixin {
     @Inject(method = ["isItemValidForInsertion"], at = [At("HEAD")], cancellable = true, remap = false)
     private fun allowConfiguredBattery(stack: ItemStack, automation: AutomationType, ci: CallbackInfoReturnable<Boolean>) {
-        if ((this as? BatteryDischargeSlot)?.fluxBatteryDischargeSlot == true && stack.item is FluxBatteryItem) {
+        val direction = this as? BatteryDischargeSlot
+        if (direction != null && (direction.fluxBatteryDischargeSlot || direction.fluxBatteryChargeSlot) && stack.item is FluxBatteryItem) {
             val config = BatteryStateService.config(stack)
             if (config.networkId > 0 && config.ownerUuid != UNOWNED) ci.returnValue = true
         }

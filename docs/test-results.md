@@ -1,4 +1,53 @@
-# Build- und Testbericht — 16.10.2026
+# Build- und Testbericht
+
+## Veröffentlichungskandidat 0.1.3-beta.1 — 12.11.2026
+
+MIT-Lizenz und Flux-Networks-Lizenzhinweis werden im JAR mitgeliefert. Die Mod-Beschreibung nennt sowohl Point- als auch Plug-Betrieb. README und Changelog beschreiben den aktuellen Stand.
+
+Der neue GameTest `crossDimensionMoveAndPerOwnerQuota` verwendet echte Maschinen in Overworld und Nether. Er prüft ein gemeinsames Kontingent pro Besitzer über Dimensionsgrenzen, ein unabhängiges Kontingent für einen zweiten Besitzer sowie Umzug derselben Batterie mit erhaltener Identität, Konfiguration und Energie. Das alte Ticket und die alte Verbindung müssen verschwinden, am Ziel wird das frei gewordene Kontingent nutzbar. Ein separater Testbesitzer isoliert diesen Fall von persistenten Neustart-Fixtures.
+
+Der Neustarttest legt jetzt pro Durchlauf eine frische Welt unter `build/restart-world-*` an und verwendet sie für beide JVMs. Das verhindert Einflüsse alter Fixtures, zurückgelassener Netzwerke und bereits verbrauchter Kontingente; frühere Testwelten bleiben erhalten. Loader-Prozessprüfungen laden ebenfalls das paketierte Addon.
+
+Die Loader-Prüfdaten enthielten ursprünglich rohe String-Konkatenations-Steuerzeichen (`U+0001`). Diese sind jetzt als Unicode-Escapes maskiert; ein Vergleich der dekodierten Daten bestätigt unveränderte Prüfstrukturen. Der Generator maskiert sämtliche JSON-Steuerzeichen, `verifyLoader` liest über `JSON.parse` und prüft einen Rundlauf aller 32 Steuerzeichen einschließlich Backslash/Anführungszeichen. Die Distributionsprüfung liest alle JSON-Ressourcen im fertigen JAR strikt ein.
+
+Aktueller Prüflauf erfolgreich mit Java **Temurin 21.0.7+6**, NeoForge 21.1.231 und dem endgültigen Beta-JAR:
+
+| Prüfung | Ergebnis |
+|---|---|
+| Build, JUnit, Loader-Strukturen und JSON-Rundlauf | Bestanden; 3 Unit-Tests ohne Fehler/übersprungene Tests |
+| GameTestServer mit paketiertem Addon | 23/23 bestanden |
+| Zwei getrennte Neustart-JVMs, frische gemeinsame Testwelt | Je 25/25 bestanden, vollständige Weltspeicherung |
+| Regulärer Dedicated Server mit paketiertem Addon | 23/23 bestanden, Konsolenstopp und vollständige Weltspeicherung |
+| Kompatible synthetische Mixin-/Coremod-Fixtures | 23/23 bestanden mit paketiertem Addon |
+| Pflichtkonflikt, Flux 8.0.1, verändertes 8.0.0-JAR | Je erwarteter Startabbruch nachgewiesen |
+| Client mit JEI | Vorschau/Screenshot und sauberes Beenden erfolgreich; deutsche Oberfläche bei 854 × 480 visuell geprüft |
+| Distribution und Formatprüfung | Ein Addon-JAR, MIT/Upstream-Hinweis und strikt gültige JSON-Ressourcen; `git diff --check` erfolgreich |
+
+Der SHA-256 des JARs blieb bei den abschließenden Prüfungen unverändert. [Release-Nachweis](evidence/release-0.1.3-beta.1.txt), [Quellstand-Prüfsummen](evidence/release-0.1.3-beta.1-source.sha256) und [Changelog](../CHANGELOG.md). Die bisherigen datierten Abschnitte sind historische Nachweise; ihre Testzahlen und Hashes gelten ausschließlich für den jeweils damaligen Stand.
+
+Vollständige manuelle Spielabnahme bleibt offen: [Abnahmeprotokoll](release-acceptance.md). Insbesondere belegen serverseitige Dimensions-/Tickettests weder einen tatsächlichen Chunk-Unload mit Wiederkehr noch einen durch echte Clients ausgelösten Dimensionswechsel.
+
+## Laden und Netzwerk-Einspeisung — 27.10.2026
+
+Mekanism-Item-Ladeslots (`drain`, z. B. Plus-Slot des Energiewürfels) akzeptieren jetzt auch volle konfigurierte Batterien. Der Ladehost ist ein nativer Flux-Plug-Teilnehmer. FE- und Flux-Long-Empfang füllen zuerst den lokalen Batterie-Puffer; Überschüsse gelangen unter Beachtung von Rechten, verbleibendem Zykluslimit und offenem Netzwerkbedarf in die persistente Item-Komponente `network_input`. Flux verteilt diese Energie regulär an Points und Speicher. Der Tooltip zeigt noch ausstehende Übergaben. Ohne Netzwerkbedarf bleibt die abgewiesene Energie im Ladeblock. Unkonfigurierte Batterien können lokal geladen werden.
+
+`./gradlew build --offline` erfolgreich: drei Unit-Tests und die bestehende Loader-Strukturprüfung. `./gradlew runGameTestServer -PpackagedAddon --offline` erfolgreich mit **22/22 erforderlichen Tests** (16 bestehende und sechs neue Ladetests):
+
+- Volle und teilweise gefüllte Batterien im leeren Energiewürfel; unkonfigurierte Batterie im gefüllten Ladeblock ausschließlich lokal laden; keine Überschussannahme ohne Netzwerkbedarf.
+- Tatsächlicher `drainContainer()`-Pfad: 250 FE freie Batteriekapazität zuerst füllen, weitere 1000 FE ins Netzwerk; Quelle = lokale Gutschrift + ausstehende Übergabe + Speicherzugang.
+- Schreibfreie Simulation; mehrere FE-/Flux-Handler teilen ein Zykluslimit; kopierte Stacks können keine fremde Hostbindung nutzen; positive Plug-Statistik ohne Point-Registrierung.
+- Entnahme vor Verteilung, Item-NBT-Rundlauf und erneutes Einsetzen erhalten ausstehende Übergabeenergie und setzen deren Verteilung fort; alte Handler bleiben getrennt.
+- Mitgliedschaft sperren und Netzwerk löschen: keine weitere Einspeisung und kein Verlust bereits angenommener Energie; nach Freigabe fortsetzen.
+- `Long.MAX_VALUE` Eingang und Bedarf an zweitem Maschinen-Point ohne Überlauf oder Veränderung des lokalen Quellpuffers.
+
+Der Zweiprozess-Neustarttest (`python3 scripts/test-restart.py`) besteht in beiden getrennten JVMs mit jeweils **24/24 erforderlichen Tests**. Die neue Ladefixture speichert 987654 FE im vollen lokalen Puffer plus 654321 FE ausstehende Übergabe in einem Energiewürfel. Nach dem Neustart werden privates Netzwerk, Batteriekomponenten und tickendes Chunk-Ticket wiederhergestellt; die 654321 FE fließen über den normalen Verteiler in einen echten Flux-Speicher, der lokale Puffer bleibt unverändert und Entnahme entfernt das Ticket. Die bestehende Point-/Orphan-Ticket-Prüfung besteht ebenfalls.
+
+Auch der reguläre Dedicated Server mit gebautem Addon-JAR besteht alle **22/22 Regressionstests** (`python3 scripts/test-server.py`) und beendet sich anschließend über die Konsole mit vollständiger Weltspeicherung. Die Reporter-/Script-Erwartung übernimmt jetzt die tatsächlich registrierte Testzahl statt eines alten festen Werts. Distributionsprüfung und `git diff --check` sind erfolgreich.
+
+Die erste Neustartprobe deckte einen zeitabhängigen Fehler in der bestehenden Miner-Stressprüfung auf: Bei längerer Suche konnte die erste Quelle bereits vollständig in den anschließend geleerten Akku geladen sein. Die separate Stressphase erhält jetzt nach bestätigtem echtem Abbau einen festen Quellbestand; die erwartete 100-Millionen-Zuteilung bleibt unverändert.
+
+Automatische Netzwerk-Einspeisung bleibt an den Mekanism-Hostadapter gebunden. Andere FE-Ladeblöcke können den lokalen Puffer laden. Komplexe Mekanism-Multiblocks bleiben ausgeschlossen; bei mehreren Batterieslots gewinnt weiterhin die erste Batterie.
+
 
 ## Release 0.1.2 — 18.10.2026
 
@@ -108,6 +157,8 @@ Für den Linux-Client bleibt `earlyWindowControl=false` in `run-client/config/fm
 
 ## Weiterhin manuell zu prüfen
 
+Konkrete Durchführung, Erwartungen und offener Status pro Fall: [Release-Abnahme](release-acceptance.md).
+
 - Zwei echte Spieler auf Dedicated Server: Konfigurationsoberfläche vollständig bedienen und Rechteentzug über Flux' normales GUI prüfen.
 - Einzelspieler-Bedienung und vollständige visuelle Prüfung der Flux-Verbindungsübersicht.
 - Reale ungeticketete Chunk-Entladung, Rückkehr und Batteriebewegung zwischen Dimensionen.
@@ -117,7 +168,7 @@ Für den Linux-Client bleibt `earlyWindowControl=false` in `run-client/config/fm
 
 ## Installation und Grenzen
 
-Installiert werden **Flux Battery + originales Flux Networks 8.0.0 + Mekanism + Kotlin for Forge** auf NeoForge 21.1.231. Ein Ersatz-JAR wird nicht benötigt. Aktuelle Ausgabe: `build/libs/fluxbattery-0.1.1.jar`. Hashes und entscheidende Logzeilen stehen in `evidence/verification.txt`.
+Installiert werden **Flux Battery + originales Flux Networks 8.0.0 + Mekanism + Kotlin for Forge** auf NeoForge 21.1.231. Ein Ersatz-JAR wird nicht benötigt. Aktueller Veröffentlichungskandidat: `build/libs/fluxbattery-0.1.3-beta.1.jar`. Historische Ausgaben und ihre Nachweise bleiben unten unverändert dokumentiert. Das aktuelle Abnahmeprotokoll steht in [release-acceptance.md](release-acceptance.md).
 
 Ein aktiver Point pro Maschinenposition; erster passender Batterieslot gewinnt. Keine komplexen Mekanism-IMultiblocks und keine automatische Unterstützung fremder FE-Slots. Chunkloading ist standardmäßig aus und hält ausschließlich den Maschinenchunk. Long-Summenanzeigen sättigen. Creative-/Admin-Kopien kompletter Items liegen außerhalb der Energieerhaltung normaler Survival-Transfers.
 

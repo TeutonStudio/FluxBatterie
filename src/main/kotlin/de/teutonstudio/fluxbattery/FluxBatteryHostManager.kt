@@ -3,7 +3,6 @@ package de.teutonstudio.fluxbattery
 import de.teutonstudio.fluxbattery.bridge.*
 
 import mekanism.common.inventory.slot.BasicInventorySlot
-import mekanism.common.inventory.slot.EnergyInventorySlot
 import mekanism.common.tile.base.TileEntityMekanism
 import net.minecraft.world.item.ItemStack
 import net.minecraft.server.level.ServerLevel
@@ -14,8 +13,8 @@ import sonar.fluxnetworks.api.network.SecurityLevel
 import java.util.IdentityHashMap
 
 object FluxBatteryHostManager {
-    private val hosts = IdentityHashMap<TileEntityMekanism, HostedFluxPoint>()
-    private val slots = IdentityHashMap<BasicInventorySlot, HostedFluxPoint>()
+    private val hosts = IdentityHashMap<TileEntityMekanism, HostedFluxDevice>()
+    private val slots = IdentityHashMap<BasicInventorySlot, HostedFluxDevice>()
 
     fun permitted(network: FluxNetwork, config: BatteryConfig): Boolean = network.isValid && config.ownerUuid != UNOWNED &&
         (network.securityLevel == SecurityLevel.PUBLIC || network.ownerUUID == config.ownerUuid ||
@@ -24,7 +23,7 @@ object FluxBatteryHostManager {
     fun tick(tile: TileEntityMekanism) {
         val level = tile.level as? ServerLevel ?: return
         if (tile.isRemoved || level.getBlockEntity(tile.blockPos) !== tile) { remove(tile); return }
-        val selected = MekanismHostAdapter.dischargeSlots(tile).firstOrNull { it.second.stack.item is FluxBatteryItem }
+        val selected = MekanismHostAdapter.energySlots(tile).firstOrNull { it.second.stack.item is FluxBatteryItem }
         val old = hosts[tile]
         if (selected == null) { remove(tile); return }
         val (index, slot) = selected
@@ -39,13 +38,21 @@ object FluxBatteryHostManager {
         }
         remove(tile)
         val binding = BatteryHostLifecycle(HostKey(level.server, level.dimension(), tile.blockPos.immutable(), index), id, config)
-        val point = HostedFluxPoint(tile, slot, binding, network)
+        val point = if ((slot as BatteryDischargeSlot).fluxBatteryChargeSlot) HostedFluxPlug(tile, slot, binding, network)
+            else HostedFluxPoint(tile, slot, binding, network)
         if (network.registerRuntime(point)) {
             hosts[tile] = point
             slots[slot] = point
             tile.getData(FluxBatteryMod.HOST_ATTACHMENT.get()).point = point
             BatteryChunkTicketController.update(point)
         } else point.active = false
+    }
+
+    fun receiveOverflow(stack: ItemStack, requested: Long, simulate: Boolean): Long {
+        if (requested <= 0 || ServerLifecycleHooks.getCurrentServer()?.isSameThread != true) return 0
+        // Capability handlers may be cached or created for a copied stack. Only the live slot may feed the network.
+        val host = hosts.values.firstOrNull { it is HostedFluxPlug && it.currentStack() === stack } as? HostedFluxPlug ?: return 0
+        return host.transferHandler.receive(requested, simulate)
     }
 
     fun slotChanged(slot: BasicInventorySlot) {

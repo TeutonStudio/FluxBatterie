@@ -8,7 +8,7 @@ import java.util.UUID
 
 /** Runtime only. Item components are the sole persistent configuration and energy. */
 class FluxPointAttachment {
-    var point: HostedFluxPoint? = null
+    var point: HostedFluxDevice? = null
 }
 
 data class HostKey(val server: MinecraftServer, val dimension: ResourceKey<Level>, val position: BlockPos, val slotIndex: Int)

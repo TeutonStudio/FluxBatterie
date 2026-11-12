@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "2.1.21"
     id("net.neoforged.moddev") version "2.0.141"
 }
-version = "0.1.2"
+version = "0.1.3-beta.1"
 group = "de.teutonstudio.fluxbattery"
 base.archivesName.set("fluxbattery")
 java.toolchain.languageVersion.set(JavaLanguageVersion.of(21))
@@ -47,7 +47,7 @@ neoForge {
                 systemProperty("neoforge.enabledGameTestNamespaces", "fluxbattery")
             }
         }
-        create("gameTestServer") { type = "gameTestServer"; gameDirectory = file(if (project.hasProperty("restartStage")) "run-restart" else "run-gametest"); if (project.hasProperty("restartStage")) systemProperty("fluxbattery.restartStage", project.property("restartStage").toString()); systemProperty("neoforge.enabledGameTestNamespaces", "fluxbattery"); if (project.hasProperty("compatFixture")) systemProperty("fluxbattery.compatFixture", "true") }
+        create("gameTestServer") { type = "gameTestServer"; gameDirectory = file(providers.gradleProperty("gameTestDirectory").getOrElse(if (project.hasProperty("restartStage")) "run-restart" else "run-gametest")); if (project.hasProperty("restartStage")) systemProperty("fluxbattery.restartStage", project.property("restartStage").toString()); systemProperty("neoforge.enabledGameTestNamespaces", "fluxbattery"); if (project.hasProperty("compatFixture")) systemProperty("fluxbattery.compatFixture", "true") }
     }
     mods { if (!project.hasProperty("packagedAddon")) create("fluxbattery") { sourceSet(sourceSets.main.get()) } }
 }
@@ -108,3 +108,8 @@ tasks.register<Jar>("compatFixtureJar") {
 tasks.named<JavaExec>("runServer") { standardInput = System.`in` }
 // If maintenance generation and build are requested together, package the newly generated schema.
 tasks.named("processResources") { mustRunAfter("generateFluxShapes") }
+
+// Include the addon license and upstream attribution in every distributed artifact.
+tasks.named<Jar>("jar") {
+    from("LICENSE", "THIRD_PARTY_NOTICES.txt")
+}
