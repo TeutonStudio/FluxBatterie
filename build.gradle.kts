@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "2.1.21"
     id("net.neoforged.moddev") version "2.0.141"
 }
-version = "0.1.3-beta.1"
+version = "0.1.3-beta.2"
 group = "de.teutonstudio.fluxbattery"
 base.archivesName.set("fluxbattery")
 java.toolchain.languageVersion.set(JavaLanguageVersion.of(21))
@@ -37,7 +37,10 @@ neoForge {
             sourceSet.set(clientRuntime)
             client()
             gameDirectory = file("run-client")
-            if (project.hasProperty("clientSmoke")) systemProperty("fluxbattery.clientSmoke", "true")
+            if (project.hasProperty("clientSmoke")) {
+                systemProperty("fluxbattery.clientSmoke", "true")
+                systemProperty("fluxbattery.clientSmokeSuffix", providers.gradleProperty("clientSmokeSuffix").getOrElse(""))
+            }
         }
         create("server") {
             server(); programArgument("--nogui")

@@ -14,7 +14,7 @@ import java.util.UUID
 
 private fun id(path: String) = ResourceLocation.fromNamespaceAndPath(FluxBatteryMod.ID, path)
 
-data class NetworkChoice(val id: Int, val name: String)
+data class NetworkChoice(val id: Int, val name: String, val color: Int = 0x55B8EF)
 
 data class BatterySnapshot(val identity: UUID, val hand: InteractionHand, val config: BatteryConfig, val energy: BatteryEnergy, val networks: List<NetworkChoice>) : CustomPacketPayload {
     override fun type() = TYPE
@@ -26,13 +26,13 @@ data class BatterySnapshot(val identity: UUID, val hand: InteractionHand, val co
             buf.writeJsonWithCodec(BatteryConfig.CODEC, value.config)
             buf.writeLong(value.energy.storedEnergy); buf.writeLong(value.energy.capacity)
             buf.writeVarInt(value.networks.size)
-            value.networks.forEach { buf.writeInt(it.id); buf.writeUtf(it.name, 128) }
+            value.networks.forEach { buf.writeInt(it.id); buf.writeUtf(it.name, 128); buf.writeInt(it.color) }
         }, { buf ->
             val identity = buf.readUUID(); val hand = buf.readEnum(InteractionHand::class.java)
             val config = buf.readJsonWithCodec(BatteryConfig.CODEC)
             val energy = BatteryEnergy(buf.readLong(), buf.readLong())
             val count = buf.readVarInt(); require(count in 0..4096)
-            BatterySnapshot(identity, hand, config, energy, List(count) { NetworkChoice(buf.readInt(), buf.readUtf(128)) })
+            BatterySnapshot(identity, hand, config, energy, List(count) { NetworkChoice(buf.readInt(), buf.readUtf(128), buf.readInt()) })
         })
     }
 }
@@ -52,7 +52,7 @@ object BatteryNetworking {
     // The client-only subscriber installs this. Common/server classes never reference a Screen.
     var clientReceiver: (BatterySnapshot) -> Unit = {}
     fun register(event: RegisterPayloadHandlersEvent) {
-        val registrar = event.registrar("1")
+        val registrar = event.registrar("2")
         registrar.playToClient(BatterySnapshot.TYPE, BatterySnapshot.CODEC) { payload, _ -> clientReceiver(payload) }
         registrar.playToServer(BatteryUpdate.TYPE, BatteryUpdate.CODEC) { payload, context ->
             val player = context.player() as ServerPlayer
@@ -83,7 +83,7 @@ object BatteryNetworking {
         }
         val identity = BatteryStateService.identity(stack)
         val networks = FluxNetworkData.getAllNetworks().filter { FluxBatteryHostManager.permitted(it, config.copy(ownerUuid = player.uuid)) }
-            .sortedBy { it.networkID }.take(4095).map { NetworkChoice(it.networkID, it.networkName.take(128)) }
+            .sortedBy { it.networkID }.take(4095).map { NetworkChoice(it.networkID, it.networkName.take(128), it.networkColor) }
         PacketDistributor.sendToPlayer(player, BatterySnapshot(identity, hand, config, BatteryStateService.energy(stack), listOf(NetworkChoice(0, "Disconnected")) + networks))
     }
 }

@@ -1,0 +1,75 @@
+Flux Battery 0.1.3-beta.2 — geprüft am 13.11.2026 (Europe/Berlin)
+
+Artefakt: build/libs/fluxbattery-0.1.3-beta.2.jar
+SHA-256: 276fc88d7fa117ed27c8dd49fb03979a30a9a2ba4e1ca35b2f17659e4eb1c643
+
+Umgebung: Minecraft 1.21.1 / NeoForge 21.1.231 / Temurin 21.0.7+6
+Mekanism 1.21.1-10.7.19.85 (Mod-Version 10.7.19), KFF 5.9.0, JEI 19.39.0.372 (Client)
+Original Flux Networks 8.0.0: 29e511b2d76f85bd247aa213a92bb059ecc037fcc3fed82baffcff97b638d3a6
+Konfigurationsprotokoll 2: Client und Server gemeinsam aktualisieren.
+
+Ausführung mit JAVA_HOME=/home/alex/.gradle/jdks/eclipse_adoptium-21-amd64-linux.2
+python3 scripts/test-client.py
+  Führt build und runClient mit -PpackagedAddon -PclientSmoke --offline aus.
+  Beide Sprachen bestanden; 3 Unit-Tests und Loader-Strukturprüfung erfolgreich.
+  Name-/ID-Suche, Seitenwechsel, Netzwerkauswahl, Entwurfserhalt beim Reiterwechsel,
+  alle Schalter, Long-Max-Limit, Validierung, fehlende Netzwerke, leere Suche und Trennen.
+  Echte Fenstergrößen 854 x 480 und 640 x 480; GUI-Skalierung 2.
+  Damit auch 320 x 240 GUI-Pixel geprüft, inklusive Entwurfserhalt beim Verkleinern.
+  Screenshotvarianten Deutsch/Englisch erzeugt, wesentliche Layouts visuell geprüft.
+  Synthetische Vorschau und programmatische Widget-Aktionen; kein kompletter Spiel-/Serverdialog.
+  Vorherige Client-Optionen wiederhergestellt.
+python3 scripts/test-restart.py
+  Zwei getrennte JVMs mit frischer gemeinsamer Welt: prepare und verify je 26/26 bestanden.
+python3 scripts/test-server.py
+  Regulärer Dedicated Server: 24/24 bestanden, Konsolenstopp und Weltspeicherung.
+python3 scripts/test-loader.py
+  Kompatible synthetische Mixin-/Coremod-Fixtures: 24/24 bestanden.
+  Pflichtkonflikt, falsche Flux-Version und verändertes Original-JAR: Startabbruch bestätigt.
+python3 scripts/verify-distribution.py
+  Genau ein Addon-JAR, korrekte Version und Lizenzen, strikt gültige JSON-Ressourcen;
+  keine sonar/-Ersatzklassen, Testfixture- oder Loader-Toolklassen im Addon.
+git diff --check
+  Erfolgreich.
+
+Neuer GameTest configurationSnapshotRoundTrip: Unicode-Namen, Netzwerkfarben,
+Offhand, alle Optionen, Prioritäts-/Long-Grenzwerte, vollständiger Paketverbrauch.
+Der finale JAR-Hash blieb während der abschließenden Regression unverändert.
+
+Weiterhin Beta: echte Multiplayer-GUI-Abnahme, reale Chunk-Entladung/Rückkehr
+und mehrstündiger Modpackbetrieb offen; siehe docs/release-acceptance.md.
+Dieser Prüfnachweis wurde vor Veröffentlichung und Tag-Erstellung erstellt.
+Quellstand: docs/evidence/release-0.1.3-beta.2-source.sha256
+
+Prüflogs (SHA-256):
+b86c8b89316f0b1fe7e563d9789bb3ab317db8502a6fa829e4826778c3022bac  build/client-ui-de_de.log
+97ad0d578b4ead71c51c0e919d926ac7016e08b8d354a5c13b2c3a7dbb011cd0  build/client-ui-en_us.log
+fba98ade9f583e908a2b63843a797e5ec5276bf03965dbc0ff230c766a4af90f  build/restart-prepare.log
+62feafffc47904cc73635c74ac4ccb3cd781408a605836fe06204174b8b8e46c  build/restart-verify.log
+21ad8b35e3fa296f297fa45fc7706838b45d743eb894a344cde183e70e42ed58  build/server-smoke.log
+72a20fa397907be5d64a3a991fa3a3b07b3e9fae7381b055b6044d7e6805240e  build/loader-compatible.log
+519ecd39cb5bdab0578a3409812f270a06a1d2e59cb621606e6ff35db3613564  build/loader-conflict.log
+85a1a69297d3cb08d7295360afc8615c4c6ba115d1057246b653ba1d2867fb8b  build/loader-unsupported-version.log
+29370a809edb1f4732bdb5931a80adc9e68052836cf348cef5daf9331ec02206  build/loader-modified-jar.log
+
+UI-Screenshots (SHA-256):
+08b2da73206fd66f0275e22258294604701ee72aca645f9d057d26c3e247fa0a  docs/evidence/battery-disconnected-en.png
+67dde52a0c207bb0ff88f34fb6151efc8823d9ff6ca857bfbaf892755391e7cc  docs/evidence/battery-disconnected.png
+acee549700e9670b4b2a89f8b0d5f89c7d57aecf4f81c7a21e8e2e3329681cb0  docs/evidence/battery-empty-list-en.png
+01f35662573b9da7a371708fd08ebafffed33dddec0c0198fbd9dd5218a84776  docs/evidence/battery-empty-list.png
+fc5a0f1173907fb6222fe54cdcbc07da98d44235b616398bec2bd5ce486ee899  docs/evidence/battery-networks-en.png
+cab10da2b6d4596b23ea7b77273ec69ac7bfc3230ccb3c8a9b588082e23377c5  docs/evidence/battery-networks-page-2-en.png
+88ea6e8e9ffc102ab51cef4d7692c96897a66f2e3f4c13a573607200978b6db5  docs/evidence/battery-networks-page-2.png
+9900ce55c50defebc1669ab3f350740c32b2a9f4786ae43297d8843cb3f48ff4  docs/evidence/battery-networks.png
+7ad363cda169e1a0c7d6afaaab5c364e679c35e5402f986d4e8240a418cb8cde  docs/evidence/battery-no-network-en.png
+fc8481b7b7c78ea8d8090b28ed86cde5234b5d0def1446fedd63deaf19d5ee08  docs/evidence/battery-no-network.png
+37e2a73ffb6c83b8abbf502b198a3fc2473a3156cc0c509810e8da2c612a47a6  docs/evidence/battery-no-results-en.png
+cf6bb151837cb191512884ce189ef1f53beba707e3611bba4ec6efb71ee00233  docs/evidence/battery-no-results.png
+05f1c31d96cbc675bae5027d8a27941b0667fb58a4c685fd497d7ccaf9041434  docs/evidence/battery-screen-en.png
+522413be8fd9ce2b6693429c7f7f3b8332d07a080375925f63c5a7a42a1adde1  docs/evidence/battery-screen.png
+1c6f3f19a0164e995f570176b9b096ee230b127f0d6dd9339dff50fc14a5dd77  docs/evidence/battery-small-layout-en.png
+461072e77316146000e8f635490aa3b9ed549f4285edeae0c6119095fce6307a  docs/evidence/battery-small-layout.png
+a690c7e3c1a8b94261be3f7c84b927990b458ec40a0c57b14a641a0c0fa0a06e  docs/evidence/battery-switches-en.png
+8c663c3d2882b80a823ed6cb6d865949846847199c3584ca682d32515ce43258  docs/evidence/battery-switches.png
+9fcc26168b774debfd9489f2e8047f041c02f14add042ac49176637abae18c00  docs/evidence/battery-validation-en.png
+892350a746bba96d8100c37ed4ad556ab5d93eba7673f1deb0153ed258badf1d  docs/evidence/battery-validation.png

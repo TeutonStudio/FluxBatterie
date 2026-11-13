@@ -30,6 +30,24 @@ import java.util.UUID
 @GameTestHolder(FluxBatteryMod.ID)
 @PrefixGameTestTemplate(false)
 class BatteryGameTests {
+    @GameTest(template = "empty", timeoutTicks = 40)
+    fun configurationSnapshotRoundTrip(helper: GameTestHelper) {
+        val source = BatterySnapshot(UUID.randomUUID(), net.minecraft.world.InteractionHand.OFF_HAND,
+            BatteryConfig(27, UUID.randomUUID(), "Prüfung", -9999, Long.MAX_VALUE, true, true, true),
+            BatteryEnergy(Long.MAX_VALUE, Long.MAX_VALUE), listOf(
+                NetworkChoice(0, "Disconnected"), NetworkChoice(27, "Netzwerk Ä / Ω", 0xE96575),
+                NetworkChoice(Int.MAX_VALUE, "Dark", 0x000001)))
+        val buffer = net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), helper.level.registryAccess())
+        try {
+            BatterySnapshot.CODEC.encode(buffer, source)
+            check(BatterySnapshot.CODEC.decode(buffer) == source) { "Configuration snapshot lost fields or network colors" }
+            check(buffer.readableBytes() == 0) { "Snapshot codec left unread bytes" }
+        } finally {
+            buffer.release()
+        }
+        helper.succeed()
+    }
+
     private fun machine(helper: GameTestHelper, name: String, x: Int = 2): TileEntityMekanism {
         val pos = BlockPos(x, 1, 2)
         helper.setBlock(pos, BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("mekanism", name)))

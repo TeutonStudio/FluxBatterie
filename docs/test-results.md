@@ -1,5 +1,25 @@
 # Build- und Testbericht
 
+## Veröffentlichungskandidat 0.1.3-beta.2 — 13.11.2026
+
+Die neue Konfigurationsoberfläche orientiert sich an den klassischen Flux-Networks-Geräten: dunkles Panel, farbiger Rahmen, Reiter für Einstellungen und Netzwerkauswahl, Schiebeschalter und kompakte Pufferanzeige. Die Darstellung wird eigenständig gezeichnet und verwendet keine kopierten Flux-GUI-Texturen. Netzwerkfarben kommen im Snapshot vom Server; das Konfigurationsprotokoll ist jetzt Version 2. Gespeicherte Item-/Weltdaten bleiben unverändert, Client und Server müssen gemeinsam aktualisiert werden.
+
+`configurationSnapshotRoundTrip` prüft im GameTest den vollständigen Snapshot einschließlich mehrerer Netzwerkfarben, Unicode-Namen, Offhand, aller Optionen und Long-Grenzwerten. Der Client-Prüflauf bedient die tatsächlichen Widgets mit synthetischen Daten: Suche nach Namen/ID, Seitenwechsel, Auswahl, Entwurfserhalt, alle Schalter, ungültige Priorität, fehlende Netzwerke, leere Suchergebnisse und Trennen. Die tatsächliche Fenstergröße wechselt von 854 × 480 auf 640 × 480 (GUI-Skalierung 2, entsprechend 320 × 240 GUI-Pixeln); Entwürfe bleiben erhalten. Beide Sprachen wurden ausgeführt und die wesentlichen Layouts visuell geprüft. Dies ist keine vollständige Spielverbindung oder manuelle Bedienungsabnahme.
+
+| Prüfung | Ergebnis |
+|---|---|
+| Build, JUnit und Loader-Strukturen | Bestanden; 3 Unit-Tests |
+| Paketierte GameTests mit kompatiblen Mixin-/Coremod-Fixtures | 24/24 bestanden |
+| Neustart in zwei getrennten JVMs | Je 26/26 bestanden |
+| Regulärer Dedicated Server | 24/24 bestanden, sauber beendet und gespeichert |
+| Pflichtkonflikt, falsche Flux-Version und verändertes Original-JAR | Erwarteter Startabbruch bestätigt |
+| Paketierter Client mit JEI, Deutsch und Englisch | Beide Prüfläufe bestanden, Screenshots bei beiden Fenstergrößen |
+| Distribution und Formatprüfung | Ein Addon-JAR; Version, Lizenzen und JSON geprüft; `git diff --check` bestanden |
+
+Der JAR-Hash blieb bei den abschließenden Prüfungen unverändert. Artefakt- und Log-Prüfsummen: [Release-Nachweis](evidence/release-0.1.3-beta.2.txt). Reproduzierbarer Clientlauf: `python3 scripts/test-client.py`; die bisherigen Client-Optionen werden anschließend wiederhergestellt. Vorschau: [Einstellungen](evidence/battery-screen.png), [Netzwerkauswahl](evidence/battery-networks.png), [kleine GUI](evidence/battery-small-layout.png), [Schalter und Long-Limit](evidence/battery-switches.png), [Validierung](evidence/battery-validation.png), [Englisch](evidence/battery-screen-en.png).
+
+Die noch offenen echten Multiplayer-, Chunk-Unload- und Langzeittests bleiben im [Abnahmeprotokoll](release-acceptance.md) dokumentiert; dieser Stand ist weiterhin als Beta gekennzeichnet.
+
 ## Veröffentlichungskandidat 0.1.3-beta.1 — 12.11.2026
 
 MIT-Lizenz und Flux-Networks-Lizenzhinweis werden im JAR mitgeliefert. Die Mod-Beschreibung nennt sowohl Point- als auch Plug-Betrieb. README und Changelog beschreiben den aktuellen Stand.

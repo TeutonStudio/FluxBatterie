@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.3-beta.2 — 13.11.2026
+
+- Konfiguration im Stil klassischer Flux-Networks-Geräte überarbeitet: dunkles Panel, Rahmen in Netzwerkfarbe, Reiter und kompakte Schiebeschalter.
+- Direkte Netzwerkauswahl mit Suche nach Name/ID, Seitenwechsel, vollständigen Namen/IDs im Tooltip und explizitem Trennen.
+- Eingaben bleiben bei Reiterwechseln, Netzwerkauswahl und Größenänderungen erhalten. Speichern und Abbrechen behalten ihre bisherige Bedeutung.
+- Kompakte Pufferanzeige mit Prozentwert; exakte FE-Werte und Hinweis auf den Stand beim Öffnen im Tooltip. Deutsch und Englisch aktualisiert.
+- Netzwerkfarbe im Konfigurations-Snapshot übertragen; Protokoll auf 2 erhöht. Client und Server müssen gemeinsam aktualisiert werden. Gespeicherte Batterie- und Weltdaten bleiben kompatibel.
+- Snapshot-Rundlauf als GameTest ergänzt und Client-Prüflauf um Bedienungs- und Layoutszenarien erweitert.
+- Weiterhin Beta: Die noch offenen Multiplayer-, Chunk-Unload- und Langzeittests aus dem Abnahmeprotokoll gelten unverändert.
+
 ## 0.1.3-beta.1 — 12.11.2026
 
 - Batterie im Mekanism-Item-Ladeslot arbeitet als virtueller Flux Plug: zuerst den lokalen Puffer füllen, dann Überschüsse in das konfigurierte Flux-Netzwerk einspeisen.

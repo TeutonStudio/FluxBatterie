@@ -9,7 +9,7 @@ Auf Client und Server installieren:
 - NeoForge **21.1.231**, Java **21**
 - Mekanism **1.21.1-10.7.19.85** (interne Mod-Version `10.7.19`)
 - Kotlin for Forge **5.9.0** (NeoForge-Version)
-- `fluxbattery-0.1.3-beta.1.jar` aus `build/libs/`
+- `fluxbattery-0.1.3-beta.2.jar` aus `build/libs/`
 - originales `FluxNetworks-1.21.1-8.0.0.jar` (CurseForge-Datei **6089446**)
 
 **Ausgeliefert wird nur das Flux-Battery-JAR.** Ein Ladezeit-Patch erweitert die originalen Flux-Klassen im Speicher. Ein altes Ersatz-/Bridge-JAR muss aus dem Mods-Ordner entfernt werden. Mod-ID und Flux-Speicherformate bleiben erhalten.
@@ -26,7 +26,7 @@ Freigegeben ist ausschließlich das unveränderte Flux Networks **8.0.0**, SHA-2
 6. Zum Einspeisen die Batterie in einen **Item-Ladeslot** einsetzen, z. B. den Plus-Slot eines Mekanism-Energiewürfels. Dieser lädt zuerst den Batterie-Puffer. Überschüsse versorgen Points und Flux-Speicher über die normale Netzwerkverteilung; Rechte, Priorität und Transferlimit gelten auch dabei. Bei fehlendem Bedarf wird weitere Energie abgewiesen und bleibt im Ladeblock. Bereits angenommene, noch nicht verteilte Energie bleibt im Item gespeichert und erscheint im Tooltip; beim erneuten Einsetzen in einen Ladeslot wird sie weitergegeben.
 7. Entnehmen beendet Verbindung und Chunk-Ticket. Dieselbe Batterie kann anschließend in eine andere geeignete Maschine eingesetzt werden.
 
-Die Konfiguration verwendet ein dunkles Flux-Terminal mit segmentierter Energieanzeige und einem dazu passenden Item-Icon. Netzwerke lassen sich vorwärts und rückwärts wechseln. Tooltips erläutern Surge, unbegrenzten Transfer und die Voraussetzungen für Chunkloading. Deutsch und Englisch werden unterstützt. Die Energieanzeige zeigt den Stand beim Öffnen.
+Die Konfiguration orientiert sich an den klassischen Flux-Networks-Oberflächen: dunkles Panel, Rahmen in der gewählten Netzwerkfarbe, Reiter für Einstellungen und Netzwerkauswahl sowie Schiebeschalter. Die Netzwerkliste lässt sich nach Name oder ID durchsuchen und seitenweise durchblättern; „Trennen“ entfernt die Netzwerkauswahl. Entwürfe bleiben beim Reiterwechsel und bei Größenänderungen erhalten und werden erst mit „Konfiguration speichern“ übernommen. Die kompakte Pufferanzeige zeigt den Stand beim Öffnen, ihr Tooltip die exakten FE-Werte. Tooltips erläutern Surge, unbegrenzten Transfer und Chunkloading. Deutsch und Englisch werden unterstützt. Client und Server benötigen denselben neuen Addon-Stand (Konfigurationsprotokoll 2).
 
 Neue Batterien erlauben standardmäßig **100 Millionen FE pro Zyklus**. Bereits konfigurierte Batterien behalten ihr gespeichertes Limit: für mehr Durchfluss in der Batterie-Konfiguration das Limit erhöhen oder „Unlimited transfer“ aktivieren. Auch das Limit am versorgenden Flux Plug und die Energiequelle müssen den Verbrauch abdecken.
 
@@ -55,7 +55,7 @@ python3 scripts/bootstrap-dependencies.py
 python3 scripts/test-restart.py
 python3 scripts/test-loader.py
 python3 scripts/test-server.py
-./gradlew runClient -PpackagedAddon -PclientSmoke
+python3 scripts/test-client.py
 python3 scripts/verify-distribution.py
 ```
 
@@ -63,7 +63,7 @@ Java 21 über `JAVA_HOME` auswählen; Gradle kann die Toolchain alternativ herun
 
 Der Neustarttest erzeugt für jeden Durchlauf eine frische Testwelt unter `build/restart-world-*`; seine beiden JVMs verwenden dieselbe Welt. Vorherige Testwelten bleiben erhalten.
 
-Der Client-Smoke-Test zeigt eine synthetische Konfigurationsvorschau, speichert `docs/evidence/battery-screen.png` und beendet den Client.
+`scripts/test-client.py` prüft Deutsch und Englisch und stellt die vorherigen Client-Optionen wieder her. Der Client-Smoke-Test (`./gradlew runClient -PpackagedAddon -PclientSmoke`) bedient eine synthetische Konfigurationsvorschau (Suche, Seitenwechsel, Entwurfserhalt, Schalter und Validierung), speichert mehrere Screenshots unter `docs/evidence/battery-*.png` und beendet den Client. Er ersetzt keinen vollständigen Client-/Server-Bedientest.
 
 ### Start in IntelliJ IDEA
 
@@ -77,7 +77,7 @@ Bei `Unknown module: cpw.mods.securejarhandler` und anschließendem `Inaccessibl
 
 Flux Battery steht unter der [MIT-Lizenz](LICENSE). Hinweise zu Flux Networks und dessen MIT-Lizenz stehen in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt); beide Dateien werden im Addon-JAR mitgeliefert. Die ursprüngliche MDK-Vorlagenlizenz bleibt separat in `TEMPLATE_LICENSE.txt` erhalten.
 
-Änderungen: [CHANGELOG.md](CHANGELOG.md). Aktueller Veröffentlichungskandidat: **0.1.3-beta.1**. Das ist eine Beta; vollständige Multiplayer-, Chunk-Unload- und Langzeitabnahme stehen noch aus. Konkrete Prüfschritte und ihr Status: [docs/release-acceptance.md](docs/release-acceptance.md).
+Änderungen: [CHANGELOG.md](CHANGELOG.md). Aktueller Veröffentlichungskandidat: **0.1.3-beta.2**. Das ist eine Beta; vollständige Multiplayer-, Chunk-Unload- und Langzeitabnahme stehen noch aus. Konkrete Prüfschritte und ihr Status: [docs/release-acceptance.md](docs/release-acceptance.md).
 
 ## Entwicklungsstand
 
