@@ -1,0 +1,27 @@
+name: Wiki documentation
+on:
+  push:
+    paths:
+      - 'README.md'
+      - 'wiki/**'
+      - 'docs/wiki-*.md'
+      - 'docs/wiki-media-coverage.json'
+      - 'scripts/verify-wiki.py'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    paths:
+      - 'README.md'
+      - 'wiki/**'
+      - 'docs/wiki-*.md'
+      - 'docs/wiki-media-coverage.json'
+      - 'scripts/verify-wiki.py'
+      - '.github/workflows/docs.yml'
+permissions:
+  contents: read
+jobs:
+  wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check bilingual guides, navigation and image provenance
+        run: python3 scripts/verify-wiki.py --require-all-media

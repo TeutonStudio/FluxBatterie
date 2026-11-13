@@ -1,0 +1,291 @@
+{
+  "release": "0.1.3-beta.2",
+  "capture_date": "2026-11-13",
+  "languages": [
+    "de",
+    "en"
+  ],
+  "guides": [
+    {
+      "de": "Installation",
+      "en": "Installation-en",
+      "media": [
+        "assets/screenshots/wiki-overview.png"
+      ]
+    },
+    {
+      "de": "Erste-Schritte",
+      "en": "Getting-Started",
+      "media": [
+        "assets/screenshots/wiki-configuration.png"
+      ]
+    },
+    {
+      "de": "Herstellung",
+      "en": "Crafting",
+      "media": [
+        "assets/screenshots/wiki-crafting.png"
+      ]
+    },
+    {
+      "de": "Netzwerkauswahl",
+      "en": "Network-Selection",
+      "media": [
+        "assets/screenshots/wiki-network-selection.png"
+      ]
+    },
+    {
+      "de": "Einstellungen",
+      "en": "Settings",
+      "media": [
+        "assets/screenshots/battery-switches.png"
+      ]
+    },
+    {
+      "de": "Maschinen-versorgen",
+      "en": "Powering-Machines",
+      "media": [
+        "assets/screenshots/wiki-powering-machine.png"
+      ]
+    },
+    {
+      "de": "Netzwerk-einspeisen",
+      "en": "Feeding-the-Network",
+      "media": [
+        "assets/screenshots/wiki-charging-slot.png"
+      ]
+    },
+    {
+      "de": "Chunkloading",
+      "en": "Chunk-Loading",
+      "media": [
+        "assets/screenshots/wiki-server-config.png"
+      ]
+    },
+    {
+      "de": "Rechte-und-Sicherheit",
+      "en": "Permissions-and-Security",
+      "media": [
+        "assets/screenshots/wiki-network-selection.png"
+      ]
+    },
+    {
+      "de": "Fehlerbehebung",
+      "en": "Troubleshooting",
+      "media": [
+        "assets/screenshots/battery-validation.png"
+      ]
+    },
+    {
+      "de": "Entwicklung-und-Pruefungen",
+      "en": "Development-and-Tests",
+      "media": [
+        "assets/screenshots/wiki-powering-machine.png"
+      ]
+    },
+    {
+      "de": "Bildnachweise",
+      "en": "Media-Provenance",
+      "media": [
+        "assets/screenshots/wiki-flux-connections.png"
+      ]
+    }
+  ],
+  "media": [
+    {
+      "path": "assets/screenshots/battery-switches.png",
+      "kind": "synthetic-client-ui",
+      "source": "docs/evidence/battery-switches.png",
+      "release": "0.1.3-beta.2",
+      "date": "2026-11-13",
+      "modified": false,
+      "sha256": "8c663c3d2882b80a823ed6cb6d865949846847199c3584ca682d32515ce43258"
+    },
+    {
+      "path": "assets/screenshots/battery-validation.png",
+      "kind": "synthetic-client-ui",
+      "source": "docs/evidence/battery-validation.png",
+      "release": "0.1.3-beta.2",
+      "date": "2026-11-13",
+      "modified": false,
+      "sha256": "892350a746bba96d8100c37ed4ad556ab5d93eba7673f1deb0153ed258badf1d"
+    },
+    {
+      "path": "assets/screenshots/wiki-charging-slot.png",
+      "kind": "in-game-capture",
+      "source": "build/wiki-capture-run/screenshots/wiki-charging-slot.png",
+      "release": "0.1.3-beta.2",
+      "date": "2026-11-13",
+      "modified": false,
+      "sha256": "738a9bf329c3ee4ae666abdbf8be3eef27e449a68b98c090787252b64547cd1b"
+    },
+    {
+      "path": "assets/screenshots/wiki-configuration.png",
+      "kind": "in-game-capture",
+      "source": "build/wiki-capture-run/screenshots/wiki-configuration.png",
+      "release": "0.1.3-beta.2",
+      "date": "2026-11-13",
+      "modified": false,
+      "sha256": "84af17792a12172c97ed917f254acca243bffe317511b1ed85ecc119262f2e21"
+    },
+    {
+      "path": "assets/screenshots/wiki-crafting.png",
+      "kind": "in-game-capture",
+      "source": "build/wiki-capture-run/screenshots/wiki-crafting.png",
+      "release": "0.1.3-beta.2",
+      "date": "2026-11-13",
+      "modified": false,
+      "sha256": "0849f07519f15c854e1e8593273c5374080da3eee602afece47a8d298863b445"
+    },
+    {
+      "path": "assets/screenshots/wiki-flux-connections.png",
+      "kind": "in-game-capture",
+      "source": "build/wiki-capture-run/screenshots/wiki-flux-connections.png",
+      "release": "0.1.3-beta.2",
+      "date": "2026-11-13",
+      "modified": false,
+      "sha256": "36b43456a4675f254e63c91df0f477e3c4f062e34b7b7aab5e846433e398ab42"
+    },
+    {
+      "path": "assets/screenshots/wiki-network-selection.png",
+      "kind": "in-game-capture",
+      "source": "build/wiki-capture-run/screenshots/wiki-network-selection.png",
+      "release": "0.1.3-beta.2",
+      "date": "2026-11-13",
+      "modified": false,
+      "sha256": "7e6e9af86b515c0e91cf9303f18380e6ed2723475b8236eec7403bba299e5017"
+    },
+    {
+      "path": "assets/screenshots/wiki-overview.png",
+      "kind": "in-game-capture",
+      "source": "build/wiki-capture-run/screenshots/wiki-overview.png",
+      "release": "0.1.3-beta.2",
+      "date": "2026-11-13",
+      "modified": false,
+      "sha256": "23cca3e17de751a248f865ff7d5b65b28350945bdde688172fba76d54ed05f4e"
+    },
+    {
+      "path": "assets/screenshots/wiki-powering-machine.png",
+      "kind": "in-game-capture",
+      "source": "build/wiki-capture-run/screenshots/wiki-powering-machine.png",
+      "release": "0.1.3-beta.2",
+      "date": "2026-11-13",
+      "modified": false,
+      "sha256": "223157aec2416aa7e95462a0a57ec3862ce2cc096a2e7a6d2ab33d14f11c1814"
+    },
+    {
+      "path": "assets/screenshots/wiki-server-config.png",
+      "kind": "in-game-capture",
+      "source": "build/wiki-capture-run/screenshots/wiki-server-config.png",
+      "release": "0.1.3-beta.2",
+      "date": "2026-11-13",
+      "modified": false,
+      "sha256": "fbff1180f80cf64e7c2d851cfe591a5406a242df939773826cd021dbc0627631"
+    }
+  ],
+  "features": [
+    {
+      "id": "crafting",
+      "page": "Herstellung",
+      "status": "shown",
+      "media": [
+        "assets/screenshots/wiki-crafting.png"
+      ],
+      "scope": "Actual crafting table recipe and result."
+    },
+    {
+      "id": "configuration",
+      "page": "Erste-Schritte",
+      "status": "shown",
+      "media": [
+        "assets/screenshots/wiki-configuration.png"
+      ],
+      "scope": "Actual server-backed held battery configuration."
+    },
+    {
+      "id": "networks",
+      "page": "Netzwerkauswahl",
+      "status": "shown",
+      "media": [
+        "assets/screenshots/wiki-network-selection.png"
+      ],
+      "scope": "Actual accessible networks; larger-list search/pagination checked in release client harness."
+    },
+    {
+      "id": "priority-limit-surge",
+      "page": "Einstellungen",
+      "status": "shown",
+      "media": [
+        "assets/screenshots/battery-switches.png"
+      ],
+      "scope": "Synthetic UI options/Long-Max illustration; not a running transfer measurement."
+    },
+    {
+      "id": "point",
+      "page": "Maschinen-versorgen",
+      "status": "shown",
+      "media": [
+        "assets/screenshots/wiki-powering-machine.png"
+      ],
+      "scope": "Actual smelting output verified from Flux-fed battery."
+    },
+    {
+      "id": "plug",
+      "page": "Netzwerk-einspeisen",
+      "status": "shown",
+      "media": [
+        "assets/screenshots/wiki-charging-slot.png"
+      ],
+      "scope": "Actual charging slot; capture asserts positive energy in network storage."
+    },
+    {
+      "id": "flux-device-list",
+      "page": "Bildnachweise",
+      "status": "shown",
+      "media": [
+        "assets/screenshots/wiki-flux-connections.png"
+      ],
+      "scope": "Actual virtual Plug registered at host position; idle rate is possible."
+    },
+    {
+      "id": "chunkloading-config",
+      "page": "Chunkloading",
+      "status": "shown",
+      "media": [
+        "assets/screenshots/wiki-server-config.png"
+      ],
+      "scope": "Actual configuration; does not prove physical chunk-unload/return."
+    },
+    {
+      "id": "permissions-persistence",
+      "page": "Rechte-und-Sicherheit",
+      "status": "shown",
+      "media": [
+        "assets/screenshots/wiki-network-selection.png"
+      ],
+      "scope": "Actual owner-accessible list; server regression covers persistence/permissions, no two-client acceptance claim."
+    },
+    {
+      "id": "validation",
+      "page": "Fehlerbehebung",
+      "status": "shown",
+      "media": [
+        "assets/screenshots/battery-validation.png"
+      ],
+      "scope": "Synthetic invalid-priority check; no invalid payload sent."
+    }
+  ],
+  "capture": {
+    "window": [
+      1280,
+      800
+    ],
+    "gui_scale": 2,
+    "language": "de_de",
+    "game_directory": "build/wiki-capture-run",
+    "temporary_fixture": true,
+    "release_jar_sha256": "276fc88d7fa117ed27c8dd49fb03979a30a9a2ba4e1ca35b2f17659e4eb1c643",
+    "point_observation": "Actual smelter produced iron ingots from raw iron.",
+    "plug_observation": "Actual Flux storage received 2000000 FE from the charging host."
+  }
+}

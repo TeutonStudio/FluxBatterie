@@ -1,0 +1,1 @@
+Flux Battery **0.1.3-beta.2** · [Deutsch](Home) · [English](English) · [Downloads](https://github.com/TeutonStudio/FluxBatterie/releases) · [MIT](https://github.com/TeutonStudio/FluxBatterie/blob/v0.1.3-beta.2/LICENSE) · [Issues](https://github.com/TeutonStudio/FluxBatterie/issues)
